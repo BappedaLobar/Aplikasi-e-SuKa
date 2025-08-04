@@ -15,16 +15,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/surat-masuk", label: "Surat Masuk", icon: Mail },
-  { to: "/surat-keluar", label: "Surat Keluar", icon: Send },
-  { to: "/disposisi", label: "Disposisi", icon: FileCheck2 },
-  { to: "/klasifikasi-surat", label: "Klasifikasi Surat", icon: Book },
-  { to: "/galeri-arsip", label: "Galeri Arsip", icon: Archive },
-  { to: "/laporan", label: "Laporan", icon: FileText },
-  { to: "/data-user", label: "Data User", icon: Users },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500" },
+  { to: "/surat-masuk", label: "Surat Masuk", icon: Mail, color: "text-green-500" },
+  { to: "/surat-keluar", label: "Surat Keluar", icon: Send, color: "text-red-500" },
+  { to: "/disposisi", label: "Disposisi", icon: FileCheck2, color: "text-purple-500" },
+  { to: "/klasifikasi-surat", label: "Klasifikasi Surat", icon: Book, color: "text-yellow-500" },
+  { to: "/galeri-arsip", label: "Galeri Arsip", icon: Archive, color: "text-indigo-500" },
+  { to: "/laporan", label: "Laporan", icon: FileText, color: "text-pink-500" },
+  { to: "/data-user", label: "Data User", icon: Users, color: "text-teal-500" },
 ];
 
 export function Layout() {
@@ -55,7 +56,7 @@ export function Layout() {
                     to={item.to}
                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                   >
-                    <item.icon className="h-5 w-5" />
+                    <item.icon className={cn("h-5 w-5", item.color)} />
                     {item.label}
                   </NavLink>
                 ))}

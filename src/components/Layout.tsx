@@ -52,10 +52,13 @@ export function Layout() {
               <nav className="grid gap-2 text-lg font-medium">
                 <NavLink
                   to="/"
-                  className="flex items-center gap-2 text-lg font-semibold mb-4"
+                  className="flex items-center gap-3 text-lg font-semibold mb-4"
                 >
                   <img src="/logo.svg" alt="Logo e-SuKa" className="h-8 w-auto" />
-                  <span className="">e-SuKa</span>
+                  <div>
+                    <span className="">e-SuKa</span>
+                    <p className="text-xs font-normal text-muted-foreground">Bappeda Kabupaten Lombok Barat</p>
+                  </div>
                 </NavLink>
                 {menuItems.map((item) => (
                   <NavLink

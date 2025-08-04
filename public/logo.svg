@@ -1,1 +1,10 @@
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 246.33"><defs><style>.cls-1{fill:#27aae1;}.cls-2{fill:#1d71b8;}.cls-3{fill:#262262;}.cls-4{fill:#fff;}</style></defs><title>Logo Lobar Blue</title><path class="cls-1" d="M199.8,123.16V246.33H0V123.16A100,100,0,0,1,199.8,123.16Z"/><path class="cls-2" d="M100,24.19a100,100,0,0,1,100,100V246.33H0V124.19A100,100,0,0,1,100,24.19Z"/><path class="cls-3" d="M100,0A100,100,0,0,1,200,100V223.16H0V100A100,100,0,0,1,100,0Z"/><path class="cls-4" d="M100,48.38a75.81,75.81,0,0,1,75.81,75.81V198H24.19V124.19A75.81,75.81,0,0,1,100,48.38Z"/><path class="cls-2" d="M100,60.48a63.71,63.71,0,0,1,63.71,63.71V186H36.29V124.19A63.71,63.71,0,0,1,100,60.48Z"/><path class="cls-4" d="M100,72.57a51.62,51.62,0,0,1,51.62,51.62v51.62H48.38V124.19A51.62,51.62,0,0,1,100,72.57Z"/><path class="cls-1" d="M100,84.67a39.52,39.52,0,0,1,39.52,39.52v39.52H60.48V124.19A39.52,39.52,0,0,1,100,84.67Z"/><path class="cls-3" d="M100,96.76a27.43,27.43,0,0,1,27.43,27.43v27.43H72.57V124.19A27.43,27.43,0,0,1,100,96.76Z"/><path class="cls-4" d="M100,108.86a15.33,15.33,0,0,1,15.33,15.33v15.33H84.67V124.19A15.33,15.33,0,0,1,100,108.86Z"/></svg>
+<svg width="200" height="200" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#3B82F6"/>
+<stop offset="100%" stop-color="#10B981"/>
+</linearGradient>
+</defs>
+<path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7" stroke="url(#grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="3" y="5" width="18" height="14" rx="2" stroke="url(#grad)" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -38,6 +38,9 @@ export default function Login() {
             <p className="text-muted-foreground mt-1">Elektronik Surat dan Kearsipan Administrasi</p>
         </div>
         <AuthForm />
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          Bappeda Kabupaten Lombok Barat
+        </p>
       </div>
     </div>
   );

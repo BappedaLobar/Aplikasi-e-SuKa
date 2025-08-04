@@ -5,12 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { showError, showSuccess } from "@/utils/toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AuthForm() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState("user");
   const [loading, setLoading] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -25,13 +33,16 @@ export default function AuthForm() {
         options: {
           data: {
             full_name: fullName,
+            role: role,
           },
         },
       });
       if (error) {
         showError(error.message);
       } else {
-        showSuccess("Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi.");
+        showSuccess(
+          "Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi."
+        );
       }
     } else {
       // Sign In
@@ -52,17 +63,31 @@ export default function AuthForm() {
       <form onSubmit={handleAuth}>
         <CardContent className="space-y-4 pt-6">
           {isSignUp && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nama Lengkap</Label>
-              <Input
-                id="fullName"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                placeholder="Nama Anda"
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Nama Lengkap</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  placeholder="Nama Anda"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Level</Label>
+                <Select value={role} onValueChange={setRole}>
+                  <SelectTrigger id="role">
+                    <SelectValue placeholder="Pilih level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
           )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

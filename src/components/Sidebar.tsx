@@ -54,7 +54,7 @@ export function Sidebar({ className }: { className?: string }) {
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <NavLink to="/" className="flex items-center gap-2 font-semibold">
-            <img src="/logo.png" alt="Logo e-SuKa" className="h-8 w-auto" />
+            <img src="/logo.svg" alt="Logo e-SuKa" className="h-8 w-auto" />
             <span className="">e-SuKa</span>
           </NavLink>
         </div>

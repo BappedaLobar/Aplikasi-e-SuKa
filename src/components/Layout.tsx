@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   Menu,
   Mails,
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const menuItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500" },
@@ -29,6 +30,13 @@ const menuItems = [
 ];
 
 export function Layout() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <Sidebar />
@@ -62,7 +70,7 @@ export function Layout() {
                 ))}
               </nav>
               <div className="mt-auto">
-                <Button size="sm" className="w-full">
+                <Button size="sm" className="w-full" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </Button>

@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -13,6 +13,7 @@ import {
   LogOut,
   Mails,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const menuItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500" },
@@ -42,6 +43,13 @@ const CustomNavLink = ({ to, children }: { to: string; children: React.ReactNode
 };
 
 export function Sidebar({ className }: { className?: string }) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
   return (
     <div className={cn("hidden border-r bg-muted/40 md:block", className)}>
       <div className="flex h-full max-h-screen flex-col gap-2">
@@ -62,7 +70,7 @@ export function Sidebar({ className }: { className?: string }) {
           </nav>
         </div>
         <div className="mt-auto p-4">
-          <Button size="sm" className="w-full">
+          <Button size="sm" className="w-full" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
           </Button>

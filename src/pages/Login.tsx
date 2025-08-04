@@ -1,52 +1,51 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 import { Mails } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            navigate("/");
+        }
+    };
+    checkSession();
+
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40">
-      <Card className="mx-auto max-w-sm">
-        <CardHeader className="text-center">
+      <div className="w-full max-w-sm p-4">
+        <div className="text-center mb-6">
             <Mails className="mx-auto h-10 w-10 text-primary" />
-          <CardTitle className="text-2xl">e-SuKa Login</CardTitle>
-          <CardDescription>
-            Masukan email dan password untuk melanjutkan
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-              </div>
-              <Input id="password" type="password" required />
-            </div>
-            <Link to="/">
-                <Button type="submit" className="w-full">
-                    Login
-                </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+            <h1 className="text-2xl font-bold mt-2">e-SuKa Login</h1>
+            <p className="text-muted-foreground">Masukan email dan password untuk melanjutkan</p>
+        </div>
+        <Auth
+          supabaseClient={supabase}
+          appearance={{ theme: ThemeSupa }}
+          providers={[]}
+          theme="light"
+        />
+      </div>
     </div>
   );
 }

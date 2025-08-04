@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
+import { showSuccess } from "./utils/toast";
 
 import { Layout } from "./components/Layout";
 import Login from "./pages/Login";
@@ -24,6 +25,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [welcomeToastShown, setWelcomeToastShown] = useState(false);
 
   useEffect(() => {
     const getSession = async () => {
@@ -40,6 +42,17 @@ const App = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (session && !welcomeToastShown) {
+      const user = session.user;
+      const userName = user.user_metadata?.full_name || user.user_metadata?.name || user.email;
+      showSuccess(`Selamat Datang, ${userName}!`);
+      setWelcomeToastShown(true);
+    } else if (!session) {
+      setWelcomeToastShown(false);
+    }
+  }, [session, welcomeToastShown]);
 
   if (loading) {
     return (

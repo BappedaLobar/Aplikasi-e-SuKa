@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { Mails } from "lucide-react";
 import AuthForm from "@/components/AuthForm";
 
 export default function Login() {
@@ -34,7 +33,7 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40">
       <div className="w-full max-w-sm p-4">
         <div className="text-center mb-6">
-            <Mails className="mx-auto h-10 w-10 text-primary" />
+            <img src="/logo.png" alt="Logo Lombok Barat" className="mx-auto h-20 w-auto" />
             <h1 className="text-3xl font-bold mt-4">e-SuKa</h1>
             <p className="text-muted-foreground mt-1">Elektronik Surat dan Kearsipan Administrasi</p>
         </div>

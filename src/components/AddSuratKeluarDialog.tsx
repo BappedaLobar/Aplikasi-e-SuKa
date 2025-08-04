@@ -35,6 +35,7 @@ import { CalendarIcon, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { showSuccess, showError } from "@/utils/toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   klasifikasi_kode: z.string().min(1, "Klasifikasi surat harus dipilih."),
@@ -149,159 +150,163 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="sifat"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Jenis Surat</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih jenis surat" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Biasa">Biasa</SelectItem>
-                      <SelectItem value="Penting">Penting</SelectItem>
-                      <SelectItem value="Segera">Segera</SelectItem>
-                      <SelectItem value="Rahasia">Rahasia</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="bidang_kode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bidang</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih bidang" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {bidangList.map((b) => (
-                        <SelectItem key={b.kode} value={b.kode}>
-                          {b.kode} - {b.nama}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="klasifikasi_kode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Klasifikasi Surat</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih klasifikasi untuk membuat nomor surat" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {klasifikasiList.map((k) => (
-                        <SelectItem key={k.kode} value={k.kode}>
-                          {k.kode} - {k.keterangan}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="nomor_surat"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nomor Surat</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Pilih bidang dan klasifikasi untuk membuat nomor..." {...field} readOnly />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tanggal_surat"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Tanggal Surat</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <ScrollArea className="h-[60vh] w-full pr-4">
+              <div className="space-y-4 py-4">
+                <FormField
+                  control={form.control}
+                  name="sifat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Jenis Surat</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih jenis surat" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Biasa">Biasa</SelectItem>
+                          <SelectItem value="Penting">Penting</SelectItem>
+                          <SelectItem value="Segera">Segera</SelectItem>
+                          <SelectItem value="Rahasia">Rahasia</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="bidang_kode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bidang</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih bidang" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {bidangList.map((b) => (
+                            <SelectItem key={b.kode} value={b.kode}>
+                              {b.kode} - {b.nama}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="klasifikasi_kode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Klasifikasi Surat</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih klasifikasi untuk membuat nomor surat" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {klasifikasiList.map((k) => (
+                            <SelectItem key={k.kode} value={k.kode}>
+                              {k.kode} - {k.keterangan}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nomor_surat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nomor Surat</FormLabel>
                       <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pilih tanggal</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
+                        <Input placeholder="Pilih bidang dan klasifikasi untuk membuat nomor..." {...field} readOnly />
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tujuan"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tujuan</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Contoh: Seluruh Kepala OPD" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="perihal"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Perihal</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Contoh: Undangan Rapat Koordinasi" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tanggal_surat"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Tanggal Surat</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pilih tanggal</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tujuan"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tujuan</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Contoh: Seluruh Kepala OPD" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="perihal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Perihal</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Contoh: Undangan Rapat Koordinasi" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </ScrollArea>
+            <DialogFooter className="pt-4">
               <Button type="submit" disabled={form.formState.isSubmitting || isGenerating}>
                 {form.formState.isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>

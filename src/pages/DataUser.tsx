@@ -1,8 +1,116 @@
+import { useEffect, useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { showError } from "@/utils/toast";
+import AddUserDialog from "@/components/AddUserDialog";
+
+type UserProfile = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  role: string;
+};
+
 export default function DataUser() {
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, role")
+      .order("full_name", { ascending: true });
+
+    if (error) {
+      showError("Gagal memuat data pengguna.");
+      console.error(error);
+    } else {
+      setUsers(data || []);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Data User</h1>
-      <p>Halaman untuk mengelola data pengguna.</p>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Data User</h1>
+          <p className="text-muted-foreground">
+            Kelola pengguna yang terdaftar di sistem.
+          </p>
+        </div>
+        <AddUserDialog onUserAdded={fetchUsers} />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Daftar Pengguna</CardTitle>
+          <CardDescription>
+            Berikut adalah daftar pengguna yang memiliki akses ke sistem.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nama Lengkap</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Level</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-[70px]" /></TableCell>
+                  </TableRow>
+                ))
+              ) : users.length > 0 ? (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.full_name || "N/A"}</TableCell>
+                    <TableCell>{user.email || "N/A"}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-24 text-center">
+                    Belum ada pengguna terdaftar.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }

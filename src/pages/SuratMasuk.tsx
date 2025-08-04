@@ -28,6 +28,7 @@ import AddSuratMasukDialog from "@/components/AddSuratMasukDialog";
 import EditSuratMasukDialog from "@/components/EditSuratMasukDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 type SuratMasuk = {
   id: string;
@@ -36,6 +37,7 @@ type SuratMasuk = {
   tanggal_diterima: string;
   pengirim: string;
   perihal: string;
+  sifat: string;
 };
 
 export default function SuratMasuk() {
@@ -88,6 +90,7 @@ export default function SuratMasuk() {
                 <TableHead>Nomor Surat</TableHead>
                 <TableHead>Perihal</TableHead>
                 <TableHead>Pengirim</TableHead>
+                <TableHead>Sifat</TableHead>
                 <TableHead>Tgl. Diterima</TableHead>
                 <TableHead>
                   <span className="sr-only">Actions</span>
@@ -99,8 +102,9 @@ export default function SuratMasuk() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-[70px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
@@ -111,6 +115,11 @@ export default function SuratMasuk() {
                     <TableCell className="font-medium">{surat.nomor_surat}</TableCell>
                     <TableCell>{surat.perihal}</TableCell>
                     <TableCell>{surat.pengirim}</TableCell>
+                    <TableCell>
+                      <Badge variant={surat.sifat === 'Rahasia' || surat.sifat === 'Penting' ? 'destructive' : 'secondary'}>
+                        {surat.sifat}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       {new Date(surat.tanggal_diterima).toLocaleDateString("id-ID", {
                         day: 'numeric', month: 'short', year: 'numeric'
@@ -138,7 +147,7 @@ export default function SuratMasuk() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     Belum ada surat masuk.
                   </TableCell>
                 </TableRow>

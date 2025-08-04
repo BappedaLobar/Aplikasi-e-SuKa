@@ -21,6 +21,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,6 +42,7 @@ const formSchema = z.object({
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
   pengirim: z.string().min(1, "Pengirim tidak boleh kosong."),
   perihal: z.string().min(1, "Perihal tidak boleh kosong."),
+  sifat: z.string().min(1, "Jenis surat harus dipilih."),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -45,6 +53,7 @@ type SuratMasuk = {
   tanggal_surat: string;
   pengirim: string;
   perihal: string;
+  sifat: string;
 };
 
 export default function EditSuratMasukDialog({ surat, onSuratUpdated }: { surat: SuratMasuk; onSuratUpdated: () => void }) {
@@ -60,6 +69,7 @@ export default function EditSuratMasukDialog({ surat, onSuratUpdated }: { surat:
         tanggal_surat: parseISO(surat.tanggal_surat),
         pengirim: surat.pengirim,
         perihal: surat.perihal,
+        sifat: surat.sifat,
       });
     }
   }, [open, surat, form]);
@@ -107,6 +117,29 @@ export default function EditSuratMasukDialog({ surat, onSuratUpdated }: { surat:
                   <FormControl>
                     <Input placeholder="Contoh: 123/BPD/IV/2024" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="sifat"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Jenis Surat</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih jenis surat" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Biasa">Biasa</SelectItem>
+                      <SelectItem value="Penting">Penting</SelectItem>
+                      <SelectItem value="Segera">Segera</SelectItem>
+                      <SelectItem value="Rahasia">Rahasia</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

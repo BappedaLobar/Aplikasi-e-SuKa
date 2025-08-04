@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,6 +21,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -30,6 +37,8 @@ import { format } from "date-fns";
 import { showSuccess, showError } from "@/utils/toast";
 
 const formSchema = z.object({
+  klasifikasi_kode: z.string().min(1, "Klasifikasi surat harus dipilih."),
+  sifat: z.string().min(1, "Jenis surat harus dipilih."),
   nomor_surat: z.string().min(1, "Nomor surat tidak boleh kosong."),
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
   pengirim: z.string().min(1, "Pengirim tidak boleh kosong."),
@@ -37,22 +46,73 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+type Klasifikasi = { kode: string; keterangan: string };
+
+const romanNumerals = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: () => void }) {
   const [open, setOpen] = useState(false);
+  const [klasifikasiList, setKlasifikasiList] = useState<Klasifikasi[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      klasifikasi_kode: "",
+      sifat: "",
       nomor_surat: "",
       pengirim: "",
       perihal: "",
     },
   });
 
+  const selectedKlasifikasi = form.watch("klasifikasi_kode");
+
+  useEffect(() => {
+    const fetchKlasifikasi = async () => {
+      const { data, error } = await supabase.from("klasifikasi_surat").select("kode, keterangan");
+      if (error) {
+        showError("Gagal memuat data klasifikasi.");
+      } else {
+        setKlasifikasiList(data);
+      }
+    };
+    fetchKlasifikasi();
+  }, []);
+
+  useEffect(() => {
+    const generateNomorSurat = async () => {
+      if (!selectedKlasifikasi) return;
+
+      setIsGenerating(true);
+      try {
+        const { count: countMasuk } = await supabase.from("surat_masuk").select("*", { count: "exact", head: true });
+        const { count: countKeluar } = await supabase.from("surat_keluar").select("*", { count: "exact", head: true });
+
+        const nextNumber = (countMasuk || 0) + (countKeluar || 0) + 1;
+        const formattedNumber = String(nextNumber).padStart(3, '0');
+        
+        const now = new Date();
+        const month = romanNumerals[now.getMonth() + 1];
+        const year = now.getFullYear();
+
+        const newNomorSurat = `${selectedKlasifikasi}/${formattedNumber}/01-BAPPEDA/${month}/${year}`;
+        form.setValue("nomor_surat", newNomorSurat);
+      } catch (error) {
+        showError("Gagal membuat nomor surat otomatis.");
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    generateNomorSurat();
+  }, [selectedKlasifikasi, form]);
+
   const onSubmit = async (values: FormValues) => {
+    const { klasifikasi_kode, ...rest } = values;
     const { error } = await supabase.from("surat_masuk").insert([
       {
-        ...values,
+        ...rest,
         tanggal_surat: format(values.tanggal_surat, "yyyy-MM-dd"),
       },
     ]);
@@ -79,11 +139,58 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
         <DialogHeader>
           <DialogTitle>Tambah Surat Masuk Baru</DialogTitle>
           <DialogDescription>
-            Isi detail surat masuk secara manual. Klik simpan jika sudah selesai.
+            Isi detail surat masuk. Nomor surat akan dibuat secara otomatis.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="sifat"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Jenis Surat</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih jenis surat" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Biasa">Biasa</SelectItem>
+                      <SelectItem value="Penting">Penting</SelectItem>
+                      <SelectItem value="Segera">Segera</SelectItem>
+                      <SelectItem value="Rahasia">Rahasia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="klasifikasi_kode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Klasifikasi Surat</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih klasifikasi untuk membuat nomor surat" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {klasifikasiList.map((k) => (
+                        <SelectItem key={k.kode} value={k.kode}>
+                          {k.kode} - {k.keterangan}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="nomor_surat"
@@ -91,7 +198,7 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
                 <FormItem>
                   <FormLabel>Nomor Surat</FormLabel>
                   <FormControl>
-                    <Input placeholder="Contoh: 123/BPD/IV/2024" {...field} />
+                    <Input placeholder="Pilih klasifikasi untuk membuat nomor..." {...field} readOnly />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -165,7 +272,7 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button type="submit" disabled={form.formState.isSubmitting || isGenerating}>
                 {form.formState.isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </DialogFooter>

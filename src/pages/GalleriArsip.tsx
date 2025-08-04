@@ -134,7 +134,7 @@ export default function GalleriArsip() {
                     <TableCell>{surat.partner}</TableCell>
                     <TableCell>
                       {new Date(surat.tanggal_surat).toLocaleDateString("id-ID", {
-                        day: 'numeric', month: 'short', year: 'numeric'
+                        day: '2-digit', month: 'long', year: 'numeric'
                       })}
                     </TableCell>
                     <TableCell>

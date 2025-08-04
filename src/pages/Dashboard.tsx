@@ -7,21 +7,32 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
   const [suratMasukCount, setSuratMasukCount] = useState("0");
+  const [suratKeluarCount, setSuratKeluarCount] = useState("0");
 
   useEffect(() => {
-    const fetchSuratMasukCount = async () => {
-      const { count, error } = await supabase
+    const fetchCounts = async () => {
+      const { count: smCount, error: smError } = await supabase
         .from("surat_masuk")
         .select("*", { count: "exact", head: true });
 
-      if (error) {
-        console.error("Error fetching surat masuk count:", error);
+      if (smError) {
+        console.error("Error fetching surat masuk count:", smError);
       } else {
-        setSuratMasukCount(String(count || 0));
+        setSuratMasukCount(String(smCount || 0));
+      }
+
+      const { count: skCount, error: skError } = await supabase
+        .from("surat_keluar")
+        .select("*", { count: "exact", head: true });
+
+      if (skError) {
+        console.error("Error fetching surat keluar count:", skError);
+      } else {
+        setSuratKeluarCount(String(skCount || 0));
       }
     };
 
-    fetchSuratMasukCount();
+    fetchCounts();
   }, []);
 
   return (
@@ -31,13 +42,13 @@ export default function Dashboard() {
           title="Surat Masuk"
           value={suratMasukCount}
           icon={Mail}
-          description="Total surat diterima bulan ini"
+          description="Total surat diterima"
         />
         <StatCard
           title="Surat Keluar"
-          value="78"
+          value={suratKeluarCount}
           icon={Send}
-          description="Total surat dikirim bulan ini"
+          description="Total surat dikirim"
         />
         <StatCard
           title="Disposisi"

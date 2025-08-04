@@ -23,9 +23,11 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import AddSuratMasukDialog from "@/components/AddSuratMasukDialog";
 import EditSuratMasukDialog from "@/components/EditSuratMasukDialog";
+import ArchiveDialog from "@/components/ArchiveDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +51,7 @@ export default function SuratMasuk() {
     const { data, error } = await supabase
       .from("surat_masuk")
       .select("*")
+      .eq('is_archived', false)
       .order("tanggal_diterima", { ascending: false });
 
     if (error) {
@@ -137,6 +140,8 @@ export default function SuratMasuk() {
                           <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                           <DropdownMenuItem>Lihat Detail</DropdownMenuItem>
                           <EditSuratMasukDialog surat={surat} onSuratUpdated={fetchSuratMasuk} />
+                          <DropdownMenuSeparator />
+                          <ArchiveDialog surat={surat} tableName="surat_masuk" onArchived={fetchSuratMasuk} />
                           <DropdownMenuItem className="text-red-600">
                             Hapus
                           </DropdownMenuItem>

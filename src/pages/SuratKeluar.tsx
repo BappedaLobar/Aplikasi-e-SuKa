@@ -23,10 +23,12 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import AddSuratKeluarDialog from "@/components/AddSuratKeluarDialog";
 import EditSuratKeluarDialog from "@/components/EditSuratKeluarDialog";
 import DeleteSuratKeluarDialog from "@/components/DeleteSuratKeluarDialog";
+import ArchiveDialog from "@/components/ArchiveDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +51,7 @@ export default function SuratKeluar() {
     const { data, error } = await supabase
       .from("surat_keluar")
       .select("*")
+      .eq('is_archived', false)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -138,6 +141,8 @@ export default function SuratKeluar() {
                           <DropdownMenuItem>Lihat Detail</DropdownMenuItem>
                           <EditSuratKeluarDialog surat={surat} onSuratUpdated={fetchSuratKeluar} />
                           <DeleteSuratKeluarDialog surat={surat} onSuratDeleted={fetchSuratKeluar} />
+                          <DropdownMenuSeparator />
+                          <ArchiveDialog surat={surat} tableName="surat_keluar" onArchived={fetchSuratKeluar} />
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

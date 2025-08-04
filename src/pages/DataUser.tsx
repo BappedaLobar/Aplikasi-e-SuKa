@@ -19,6 +19,17 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showError } from "@/utils/toast";
 import AddUserDialog from "@/components/AddUserDialog";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import EditUserDialog from "@/components/EditUserDialog";
+import DeleteUserDialog from "@/components/DeleteUserDialog";
 
 type UserProfile = {
   id: string;
@@ -30,6 +41,15 @@ type UserProfile = {
 export default function DataUser() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<{id: string} | null>(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUser(user);
+    }
+    fetchCurrentUser();
+  }, []);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -77,6 +97,9 @@ export default function DataUser() {
                 <TableHead>Nama Lengkap</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Level</TableHead>
+                <TableHead>
+                  <span className="sr-only">Aksi</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -86,6 +109,7 @@ export default function DataUser() {
                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-[70px]" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
                 ))
               ) : users.length > 0 ? (
@@ -98,11 +122,29 @@ export default function DataUser() {
                         {user.role}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-right">
+                      {currentUser?.id !== user.id && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <EditUserDialog user={user} onUserUpdated={fetchUsers} />
+                            <DeleteUserDialog user={user} onUserDeleted={fetchUsers} />
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     Belum ada pengguna terdaftar.
                   </TableCell>
                 </TableRow>

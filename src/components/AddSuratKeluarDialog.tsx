@@ -38,6 +38,7 @@ import { showSuccess, showError } from "@/utils/toast";
 
 const formSchema = z.object({
   klasifikasi_kode: z.string().min(1, "Klasifikasi surat harus dipilih."),
+  bidang_kode: z.string().min(1, "Bidang harus dipilih."),
   sifat: z.string().min(1, "Jenis surat harus dipilih."),
   nomor_surat: z.string().min(1, "Nomor surat tidak boleh kosong."),
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
@@ -47,18 +48,21 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 type Klasifikasi = { kode: string; keterangan: string };
+type Bidang = { kode: string; nama: string };
 
 const romanNumerals = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: () => void }) {
   const [open, setOpen] = useState(false);
   const [klasifikasiList, setKlasifikasiList] = useState<Klasifikasi[]>([]);
+  const [bidangList, setBidangList] = useState<Bidang[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       klasifikasi_kode: "",
+      bidang_kode: "",
       sifat: "",
       nomor_surat: "",
       tujuan: "",
@@ -67,22 +71,24 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
   });
 
   const selectedKlasifikasi = form.watch("klasifikasi_kode");
+  const selectedBidang = form.watch("bidang_kode");
 
   useEffect(() => {
-    const fetchKlasifikasi = async () => {
-      const { data, error } = await supabase.from("klasifikasi_surat").select("kode, keterangan");
-      if (error) {
-        showError("Gagal memuat data klasifikasi.");
-      } else {
-        setKlasifikasiList(data);
-      }
+    const fetchInitialData = async () => {
+      const { data: klasifikasiData, error: klasifikasiError } = await supabase.from("klasifikasi_surat").select("kode, keterangan");
+      if (klasifikasiError) showError("Gagal memuat data klasifikasi.");
+      else setKlasifikasiList(klasifikasiData);
+
+      const { data: bidangData, error: bidangError } = await supabase.from("bidang").select("kode, nama");
+      if (bidangError) showError("Gagal memuat data bidang.");
+      else setBidangList(bidangData);
     };
-    fetchKlasifikasi();
+    fetchInitialData();
   }, []);
 
   useEffect(() => {
     const generateNomorSurat = async () => {
-      if (!selectedKlasifikasi) return;
+      if (!selectedKlasifikasi || !selectedBidang) return;
 
       setIsGenerating(true);
       try {
@@ -96,7 +102,7 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
         const month = romanNumerals[now.getMonth() + 1];
         const year = now.getFullYear();
 
-        const newNomorSurat = `${selectedKlasifikasi}/${formattedNumber}/01-BAPPEDA/${month}/${year}`;
+        const newNomorSurat = `${selectedKlasifikasi}/${formattedNumber}/${selectedBidang}-BAPPEDA/${month}/${year}`;
         form.setValue("nomor_surat", newNomorSurat);
       } catch (error) {
         showError("Gagal membuat nomor surat otomatis.");
@@ -106,10 +112,10 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
     };
 
     generateNomorSurat();
-  }, [selectedKlasifikasi, form]);
+  }, [selectedKlasifikasi, selectedBidang, form]);
 
   const onSubmit = async (values: FormValues) => {
-    const { klasifikasi_kode, ...rest } = values;
+    const { klasifikasi_kode, bidang_kode, ...rest } = values;
     const { error } = await supabase.from("surat_keluar").insert([
       {
         ...rest,
@@ -169,6 +175,30 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
             />
             <FormField
               control={form.control}
+              name="bidang_kode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bidang</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih bidang" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {bidangList.map((b) => (
+                        <SelectItem key={b.kode} value={b.kode}>
+                          {b.kode} - {b.nama}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="klasifikasi_kode"
               render={({ field }) => (
                 <FormItem>
@@ -198,7 +228,7 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
                 <FormItem>
                   <FormLabel>Nomor Surat</FormLabel>
                   <FormControl>
-                    <Input placeholder="Pilih klasifikasi untuk membuat nomor..." {...field} readOnly />
+                    <Input placeholder="Pilih bidang dan klasifikasi untuk membuat nomor..." {...field} readOnly />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -18,6 +18,7 @@ import KlasifikasiSurat from "./pages/KlasifikasiSurat";
 import GalleriArsip from "./pages/GalleriArsip";
 import Laporan from "./pages/Laporan";
 import DataUser from "./pages/DataUser";
+import DataBidang from "./pages/DataBidang";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route element={session ? <Layout /> : <Navigate to="/login" replace />}>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/data-bidang" element={<DataBidang />} />
               <Route path="/surat-masuk" element={<SuratMasuk />} />
               <Route path="/surat-keluar" element={<SuratKeluar />} />
               <Route path="/disposisi" element={<Disposisi />} />

@@ -11,11 +11,13 @@ import {
   FileText,
   Users,
   LogOut,
+  Briefcase,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const menuItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500" },
+  { to: "/data-bidang", label: "Data Bidang", icon: Briefcase, color: "text-cyan-500" },
   { to: "/surat-masuk", label: "Surat Masuk", icon: Mail, color: "text-green-500" },
   { to: "/surat-keluar", label: "Surat Keluar", icon: Send, color: "text-red-500" },
   { to: "/disposisi", label: "Disposisi", icon: FileCheck2, color: "text-purple-500" },

@@ -33,7 +33,7 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40">
       <div className="w-full max-w-sm p-4">
         <div className="text-center mb-6">
-            <img src="/logo.ico" alt="Logo Lombok Barat" className="mx-auto h-20 w-auto" />
+            <img src="/logo.png" alt="Logo Lombok Barat" className="mx-auto h-20 w-auto" />
             <h1 className="text-3xl font-bold mt-4">e-SuKa</h1>
             <p className="text-muted-foreground mt-1">Elektronik Surat dan Kearsipan Administrasi</p>
         </div>

@@ -54,7 +54,7 @@ export function Layout() {
                   to="/"
                   className="flex items-center gap-2 text-lg font-semibold mb-4"
                 >
-                  <img src="/logo.ico" alt="Logo e-SuKa" className="h-8 w-auto" />
+                  <img src="/logo.png" alt="Logo e-SuKa" className="h-8 w-auto" />
                   <span className="">e-SuKa</span>
                 </NavLink>
                 {menuItems.map((item) => (

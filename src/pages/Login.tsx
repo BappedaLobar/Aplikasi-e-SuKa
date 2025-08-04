@@ -1,9 +1,8 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { Mails } from "lucide-react";
+import AuthForm from "@/components/AuthForm";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -36,15 +35,10 @@ export default function Login() {
       <div className="w-full max-w-sm p-4">
         <div className="text-center mb-6">
             <Mails className="mx-auto h-10 w-10 text-primary" />
-            <h1 className="text-2xl font-bold mt-2">e-SuKa Login</h1>
-            <p className="text-muted-foreground">Masukan email dan password untuk melanjutkan</p>
+            <h1 className="text-3xl font-bold mt-4">e-SuKa</h1>
+            <p className="text-muted-foreground mt-1">Elektronik Surat dan Kearsipan Administrasi</p>
         </div>
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          providers={[]}
-          theme="light"
-        />
+        <AuthForm />
       </div>
     </div>
   );

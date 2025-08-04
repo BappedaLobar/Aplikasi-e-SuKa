@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Card,
   CardContent,
@@ -9,27 +11,49 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const recentMails = [
-    { id: 1, type: 'Masuk', subject: 'Undangan Rapat Koordinasi', from: 'Dinas Pendidikan', date: '14 Jun 2024', status: 'Baru' },
-    { id: 2, type: 'Keluar', subject: 'Permohonan Data Statistik', to: 'BPS Lombok Barat', date: '13 Jun 2024', status: 'Terkirim' },
-    { id: 3, type: 'Masuk', subject: 'Laporan Bulanan', from: 'Bidang Perekonomian', date: '12 Jun 2024', status: 'Didisposisi' },
-    { id: 4, type: 'Keluar', subject: 'Nota Dinas', to: 'Bidang Infrastruktur', date: '11 Jun 2024', status: 'Terkirim' },
-    { id: 5, type: 'Masuk', subject: 'Pengantar SK', from: 'BKPSDM', date: '10 Jun 2024', status: 'Diarsip' },
-];
+type RecentMail = {
+  id: string;
+  perihal: string;
+  pengirim: string;
+};
 
 export default function RecentMail() {
+  const [mails, setMails] = useState<RecentMail[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecentMails = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("surat_masuk")
+        .select("id, perihal, pengirim")
+        .order("tanggal_diterima", { ascending: false })
+        .limit(5);
+
+      if (error) {
+        console.error("Error fetching recent mails:", error);
+      } else {
+        setMails(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchRecentMails();
+  }, []);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Aktivitas Surat Terbaru</CardTitle>
         <CardDescription>
-          5 aktivitas surat terakhir yang tercatat di sistem.
+          5 surat masuk terakhir yang tercatat di sistem.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -41,19 +65,39 @@ export default function RecentMail() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentMails.map((mail) => (
-              <TableRow key={mail.id}>
-                <TableCell>
-                  <div className="font-medium">{mail.subject}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {mail.type === 'Masuk' ? `Dari: ${mail.from}` : `Untuk: ${mail.to}`}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                    <Badge variant={mail.status === 'Baru' ? 'default' : 'outline'}>{mail.status}</Badge>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="mt-1 h-3 w-1/2" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-6 w-12" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : mails.length > 0 ? (
+              mails.map((mail) => (
+                <TableRow key={mail.id}>
+                  <TableCell>
+                    <div className="font-medium">{mail.perihal}</div>
+                    <div className="text-sm text-muted-foreground">
+                      Dari: {mail.pengirim}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="outline">Baru</Badge>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={2} className="h-24 text-center">
+                  Belum ada surat.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </CardContent>

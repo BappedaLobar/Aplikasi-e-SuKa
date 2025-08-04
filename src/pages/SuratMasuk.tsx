@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AddSuratMasukDialog from "@/components/AddSuratMasukDialog";
+import EditSuratMasukDialog from "@/components/EditSuratMasukDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -126,7 +127,7 @@ export default function SuratMasuk() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                           <DropdownMenuItem>Lihat Detail</DropdownMenuItem>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <EditSuratMasukDialog surat={surat} onSuratUpdated={fetchSuratMasuk} />
                           <DropdownMenuItem className="text-red-600">
                             Hapus
                           </DropdownMenuItem>

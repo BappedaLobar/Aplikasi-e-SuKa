@@ -34,6 +34,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -254,7 +255,7 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "PPP")
+                                format(field.value, "dd MMMM yyyy", { locale: id })
                               ) : (
                                 <span>Pilih tanggal</span>
                               )}

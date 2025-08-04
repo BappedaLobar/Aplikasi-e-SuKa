@@ -34,6 +34,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
+import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
@@ -161,7 +162,7 @@ export default function EditSuratMasukDialog({ surat, onSuratUpdated }: { surat:
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(field.value, "dd MMMM yyyy", { locale: id })
                           ) : (
                             <span>Pilih tanggal</span>
                           )}

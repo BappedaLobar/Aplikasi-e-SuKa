@@ -80,7 +80,7 @@ export function Layout() {
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
-            <h1 className="text-lg font-semibold">e-SuKa</h1>
+            <h1 className="text-lg font-semibold">Elektronik Surat dan Kearsipan Administrasi</h1>
             <p className="text-xs text-muted-foreground">Cepat Suratnya, Aman Arsipnya</p>
           </div>
         </header>

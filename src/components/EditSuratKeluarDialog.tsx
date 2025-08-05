@@ -43,7 +43,7 @@ import { ScrollArea } from "./ui/scroll-area";
 const formSchema = z.object({
   nomor_surat: z.string().min(1, "Nomor surat tidak boleh kosong."),
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
-  penandatangan: z.string().min(1, "Nama penandatangan harus dipilih."),
+  penandatangan: z.string().min(1, "Nama pengirim harus dipilih."),
   tujuan: z.string().min(1, "Tujuan tidak boleh kosong."),
   perihal: z.string().min(1, "Perihal tidak boleh kosong."),
   sifat: z.string().min(1, "Jenis surat harus dipilih."),
@@ -205,11 +205,11 @@ export default function EditSuratKeluarDialog({ surat, onSuratUpdated }: { surat
               name="penandatangan"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Penandatangan</FormLabel>
+                  <FormLabel>Pengirim</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Pilih nama penandatangan" />
+                        <SelectValue placeholder="Pilih nama pengirim" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

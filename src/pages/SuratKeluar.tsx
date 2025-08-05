@@ -95,7 +95,7 @@ export default function SuratKeluar() {
                 <TableHead>Nomor Surat</TableHead>
                 <TableHead>Perihal</TableHead>
                 <TableHead>Tujuan</TableHead>
-                <TableHead>Penandatangan</TableHead>
+                <TableHead>Pengirim</TableHead>
                 <TableHead>Sifat</TableHead>
                 <TableHead>Tgl. Surat</TableHead>
                 <TableHead>

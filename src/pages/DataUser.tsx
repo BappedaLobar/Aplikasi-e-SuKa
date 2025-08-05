@@ -36,6 +36,8 @@ type UserProfile = {
   full_name: string | null;
   email: string | null;
   role: string;
+  jabatan: string | null;
+  nip: string | null;
 };
 
 export default function DataUser() {
@@ -55,7 +57,7 @@ export default function DataUser() {
     setLoading(true);
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, full_name, email, role")
+      .select("id, full_name, email, role, jabatan, nip")
       .order("full_name", { ascending: true });
 
     if (error) {
@@ -96,6 +98,7 @@ export default function DataUser() {
               <TableRow>
                 <TableHead>Nama Lengkap</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Jabatan</TableHead>
                 <TableHead>Level</TableHead>
                 <TableHead>
                   <span className="sr-only">Aksi</span>
@@ -108,6 +111,7 @@ export default function DataUser() {
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-[70px]" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
@@ -117,6 +121,7 @@ export default function DataUser() {
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.full_name || "N/A"}</TableCell>
                     <TableCell>{user.email || "N/A"}</TableCell>
+                    <TableCell>{user.jabatan || "N/A"}</TableCell>
                     <TableCell>
                       <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
                         {user.role}
@@ -144,7 +149,7 @@ export default function DataUser() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     Belum ada pengguna terdaftar.
                   </TableCell>
                 </TableRow>

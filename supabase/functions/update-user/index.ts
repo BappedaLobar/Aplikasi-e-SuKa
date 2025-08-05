@@ -1,3 +1,4 @@
+// @ts-nocheck
 /// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
@@ -28,9 +29,9 @@ serve(async (req) => {
       })
     }
 
-    const { userIdToUpdate, fullName, role } = await req.json()
-    if (!userIdToUpdate || !fullName || !role) {
-      return new Response(JSON.stringify({ error: 'ID Pengguna, nama lengkap, dan level diperlukan.' }), {
+    const { userIdToUpdate, fullName, role, nip, jabatan } = await req.json()
+    if (!userIdToUpdate || !fullName || !role || !jabatan) {
+      return new Response(JSON.stringify({ error: 'ID Pengguna, nama lengkap, level, dan jabatan diperlukan.' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       })
@@ -60,12 +61,12 @@ serve(async (req) => {
 
     await adminSupabaseClient.auth.admin.updateUserById(
       userIdToUpdate,
-      { user_metadata: { full_name: fullName, role: role } }
+      { user_metadata: { full_name: fullName, role: role, nip: nip, jabatan: jabatan } }
     )
 
     await adminSupabaseClient
       .from('profiles')
-      .update({ full_name: fullName, role: role })
+      .update({ full_name: fullName, role: role, nip: nip, jabatan: jabatan })
       .eq('id', userIdToUpdate)
 
     return new Response(JSON.stringify({ message: 'Pengguna berhasil diperbarui.' }), {

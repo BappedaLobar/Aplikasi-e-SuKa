@@ -30,6 +30,7 @@ import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import FileViewerDialog from "@/components/FileViewerDialog";
+import DeleteArsipDialog from "@/components/DeleteArsipDialog";
 
 type ArchivedMail = {
   id: string;
@@ -165,6 +166,7 @@ export default function GalleriArsip() {
                           )}
                           <DropdownMenuSeparator />
                           <UnarchiveDialog surat={surat} tableName={surat.type} onUnarchived={fetchArchivedMail} />
+                          <DeleteArsipDialog surat={surat} tableName={surat.type} onDeleted={fetchArchivedMail} />
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

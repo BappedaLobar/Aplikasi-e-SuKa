@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Eye } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +41,7 @@ type SuratMasuk = {
   pengirim: string;
   perihal: string;
   sifat: string;
+  file_url: string | null;
   disposisi: { id: string }[];
 };
 
@@ -140,7 +141,13 @@ export default function SuratMasuk() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                          <DropdownMenuItem>Lihat Detail</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => surat.file_url && window.open(surat.file_url, "_blank")}
+                            disabled={!surat.file_url}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Surat
+                          </DropdownMenuItem>
                           <EditSuratMasukDialog surat={surat} onSuratUpdated={fetchSuratMasuk} />
                           <DropdownMenuSeparator />
                           {surat.disposisi.length === 0 ? (

@@ -32,6 +32,7 @@ import CreateDisposisiDialog from "@/components/CreateDisposisiDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import DeleteSuratMasukDialog from "@/components/DeleteSuratMasukDialog";
 
 type SuratMasuk = {
   id: string;
@@ -42,7 +43,7 @@ type SuratMasuk = {
   perihal: string;
   sifat: string | null;
   file_url: string | null;
-  disposisi: { id: string }[];
+  disposisi: { id: string }[] | null;
 };
 
 export default function SuratMasuk() {
@@ -152,15 +153,13 @@ export default function SuratMasuk() {
                           </DropdownMenuItem>
                           <EditSuratMasukDialog surat={surat} onSuratUpdated={fetchSuratMasuk} />
                           <DropdownMenuSeparator />
-                          {surat.disposisi.length === 0 ? (
+                          {(!surat.disposisi || surat.disposisi.length === 0) ? (
                             <CreateDisposisiDialog surat={surat} onDisposisiCreated={fetchSuratMasuk} />
                           ) : (
                             <DropdownMenuItem disabled>Sudah Didisposisi</DropdownMenuItem>
                           )}
                           <ArchiveDialog surat={surat} tableName="surat_masuk" onArchived={fetchSuratMasuk} />
-                          <DropdownMenuItem className="text-red-600">
-                            Hapus
-                          </DropdownMenuItem>
+                          <DeleteSuratMasukDialog surat={surat} onSuratDeleted={fetchSuratMasuk} />
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

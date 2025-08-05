@@ -38,6 +38,9 @@ import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png", "image/jpg"];
+
 const formSchema = z.object({
   klasifikasi_kode: z.string().min(1, "Klasifikasi surat harus dipilih."),
   bidang_kode: z.string().min(1, "Bidang harus dipilih."),
@@ -46,6 +49,10 @@ const formSchema = z.object({
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
   tujuan: z.string().min(1, "Tujuan tidak boleh kosong."),
   perihal: z.string().min(1, "Perihal tidak boleh kosong."),
+  file: z.custom<FileList>()
+    .optional()
+    .refine((files) => !files || files.length === 0 || files[0].size <= MAX_FILE_SIZE, `Ukuran file maksimal 5MB.`)
+    .refine((files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files[0].type), "Hanya format .pdf, .doc, .docx, .jpg, .png yang diterima."),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -59,6 +66,7 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
   const [klasifikasiList, setKlasifikasiList] = useState<Klasifikasi[]>([]);
   const [bidangList, setBidangList] = useState<Bidang[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -117,13 +125,39 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
   }, [selectedKlasifikasi, selectedBidang, form]);
 
   const onSubmit = async (values: FormValues) => {
-    const { klasifikasi_kode, bidang_kode, ...rest } = values;
+    setIsUploading(true);
+    let fileUrl = null;
+    const file = values.file?.[0];
+
+    if (file) {
+      const fileName = `keluar_${Date.now()}-${file.name.replace(/\s/g, '_')}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("surat-files")
+        .upload(`public/${fileName}`, file);
+
+      if (uploadError) {
+        showError(`Gagal mengunggah file: ${uploadError.message}`);
+        setIsUploading(false);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("surat-files")
+        .getPublicUrl(uploadData.path);
+      
+      fileUrl = publicUrlData.publicUrl;
+    }
+
+    const { klasifikasi_kode, bidang_kode, file: formFile, ...rest } = values;
     const { error } = await supabase.from("surat_keluar").insert([
       {
         ...rest,
         tanggal_surat: format(values.tanggal_surat, "yyyy-MM-dd"),
+        file_url: fileUrl,
       },
     ]);
+
+    setIsUploading(false);
 
     if (error) {
       showError(`Gagal menambahkan surat: ${error.message}`);
@@ -305,11 +339,29 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
                     </FormItem>
                   )}
                 />
+                 <FormField
+                  control={form.control}
+                  name="file"
+                  render={({ field: { value, onChange, ...rest } }) => (
+                    <FormItem>
+                      <FormLabel>File Surat (Opsional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          onChange={(event) => onChange(event.target.files)}
+                          {...rest}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </ScrollArea>
             <DialogFooter className="pt-4">
-              <Button type="submit" disabled={form.formState.isSubmitting || isGenerating}>
-                {form.formState.isSubmitting ? "Menyimpan..." : "Simpan"}
+              <Button type="submit" disabled={form.formState.isSubmitting || isGenerating || isUploading}>
+                {isUploading ? "Mengunggah..." : form.formState.isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </DialogFooter>
           </form>

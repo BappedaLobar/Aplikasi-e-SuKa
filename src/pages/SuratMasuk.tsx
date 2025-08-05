@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -28,6 +28,7 @@ import {
 import AddSuratMasukDialog from "@/components/AddSuratMasukDialog";
 import EditSuratMasukDialog from "@/components/EditSuratMasukDialog";
 import ArchiveDialog from "@/components/ArchiveDialog";
+import CreateDisposisiDialog from "@/components/CreateDisposisiDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -40,17 +41,18 @@ type SuratMasuk = {
   pengirim: string;
   perihal: string;
   sifat: string;
+  disposisi: { id: string }[];
 };
 
 export default function SuratMasuk() {
   const [suratList, setSuratList] = useState<SuratMasuk[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchSuratMasuk = async () => {
+  const fetchSuratMasuk = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("surat_masuk")
-      .select("*")
+      .select("*, disposisi(id)")
       .eq('is_archived', false)
       .order("tanggal_diterima", { ascending: false });
 
@@ -58,14 +60,14 @@ export default function SuratMasuk() {
       showError("Gagal memuat data surat masuk.");
       console.error(error);
     } else {
-      setSuratList(data || []);
+      setSuratList(data as SuratMasuk[] || []);
     }
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchSuratMasuk();
-  }, []);
+  }, [fetchSuratMasuk]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -141,6 +143,11 @@ export default function SuratMasuk() {
                           <DropdownMenuItem>Lihat Detail</DropdownMenuItem>
                           <EditSuratMasukDialog surat={surat} onSuratUpdated={fetchSuratMasuk} />
                           <DropdownMenuSeparator />
+                          {surat.disposisi.length === 0 ? (
+                            <CreateDisposisiDialog surat={surat} onDisposisiCreated={fetchSuratMasuk} />
+                          ) : (
+                            <DropdownMenuItem disabled>Sudah Didisposisi</DropdownMenuItem>
+                          )}
                           <ArchiveDialog surat={surat} tableName="surat_masuk" onArchived={fetchSuratMasuk} />
                           <DropdownMenuItem className="text-red-600">
                             Hapus

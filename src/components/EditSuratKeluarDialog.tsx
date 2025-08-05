@@ -43,6 +43,7 @@ import { ScrollArea } from "./ui/scroll-area";
 const formSchema = z.object({
   nomor_surat: z.string().min(1, "Nomor surat tidak boleh kosong."),
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
+  penandatangan: z.string().min(1, "Nama penandatangan harus dipilih."),
   tujuan: z.string().min(1, "Tujuan tidak boleh kosong."),
   perihal: z.string().min(1, "Perihal tidak boleh kosong."),
   sifat: z.string().min(1, "Jenis surat harus dipilih."),
@@ -54,25 +55,36 @@ type SuratKeluar = {
   id: string;
   nomor_surat: string;
   tanggal_surat: string;
+  penandatangan: string | null;
   tujuan: string;
   perihal: string;
-  sifat: string;
+  sifat: string | null;
 };
+
+type UserProfile = { id: string; full_name: string | null };
 
 export default function EditSuratKeluarDialog({ surat, onSuratUpdated }: { surat: SuratKeluar; onSuratUpdated: () => void }) {
   const [open, setOpen] = useState(false);
+  const [userList, setUserList] = useState<UserProfile[]>([]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
   });
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      const { data: userData, error: userError } = await supabase.from("profiles").select("id, full_name");
+      if (userError) showError("Gagal memuat data pengguna.");
+      else setUserList(userData);
+    };
     if (open) {
+      fetchUsers();
       form.reset({
         nomor_surat: surat.nomor_surat,
         tanggal_surat: parseISO(surat.tanggal_surat),
+        penandatangan: surat.penandatangan || "",
         tujuan: surat.tujuan,
         perihal: surat.perihal,
-        sifat: surat.sifat,
+        sifat: surat.sifat || "",
       });
     }
   }, [open, surat, form]);
@@ -184,6 +196,32 @@ export default function EditSuratKeluarDialog({ surat, onSuratUpdated }: { surat
                       />
                     </PopoverContent>
                   </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="penandatangan"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Penandatangan</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih nama penandatangan" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <ScrollArea className="h-[200px]">
+                        {userList.map((user) => (
+                          <SelectItem key={user.id} value={user.full_name || ''}>
+                            {user.full_name}
+                          </SelectItem>
+                        ))}
+                      </ScrollArea>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

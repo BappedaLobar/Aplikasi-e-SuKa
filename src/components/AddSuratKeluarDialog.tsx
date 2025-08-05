@@ -48,6 +48,7 @@ const formSchema = z.object({
   sifat: z.string().min(1, "Jenis surat harus dipilih."),
   nomor_surat: z.string().min(1, "Nomor surat tidak boleh kosong."),
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
+  penandatangan: z.string().min(1, "Nama penandatangan harus dipilih."),
   tujuan: z.string().min(1, "Tujuan tidak boleh kosong."),
   perihal: z.string().min(1, "Perihal tidak boleh kosong."),
   file: z.custom<FileList>()
@@ -59,6 +60,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type Klasifikasi = { kode: string; keterangan: string };
 type Bidang = { kode: string; nama: string };
+type UserProfile = { id: string; full_name: string | null };
 
 const romanNumerals = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
@@ -66,6 +68,7 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
   const [open, setOpen] = useState(false);
   const [klasifikasiList, setKlasifikasiList] = useState<Klasifikasi[]>([]);
   const [bidangList, setBidangList] = useState<Bidang[]>([]);
+  const [userList, setUserList] = useState<UserProfile[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -76,6 +79,7 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
       bidang_kode: "",
       sifat: "",
       nomor_surat: "",
+      penandatangan: "",
       tujuan: "",
       perihal: "",
     },
@@ -93,9 +97,15 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
       const { data: bidangData, error: bidangError } = await supabase.from("bidang").select("kode, nama");
       if (bidangError) showError("Gagal memuat data bidang.");
       else setBidangList(bidangData);
+
+      const { data: userData, error: userError } = await supabase.from("profiles").select("id, full_name");
+      if (userError) showError("Gagal memuat data pengguna.");
+      else setUserList(userData);
     };
-    fetchInitialData();
-  }, []);
+    if (open) {
+      fetchInitialData();
+    }
+  }, [open]);
 
   useEffect(() => {
     const generateNomorSurat = async () => {
@@ -312,6 +322,32 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
                           />
                         </PopoverContent>
                       </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="penandatangan"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Penandatangan</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih nama penandatangan" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <ScrollArea className="h-[200px]">
+                            {userList.map((user) => (
+                              <SelectItem key={user.id} value={user.full_name || ''}>
+                                {user.full_name}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

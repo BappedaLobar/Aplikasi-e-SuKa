@@ -41,6 +41,7 @@ type SuratKeluar = {
   perihal: string;
   sifat: string | null;
   file_url: string | null;
+  penandatangan: string | null;
 };
 
 export default function SuratKeluar() {
@@ -94,6 +95,7 @@ export default function SuratKeluar() {
                 <TableHead>Nomor Surat</TableHead>
                 <TableHead>Perihal</TableHead>
                 <TableHead>Tujuan</TableHead>
+                <TableHead>Penandatangan</TableHead>
                 <TableHead>Sifat</TableHead>
                 <TableHead>Tgl. Surat</TableHead>
                 <TableHead>
@@ -108,9 +110,10 @@ export default function SuratKeluar() {
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-[70px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : suratList.length > 0 ? (
@@ -119,6 +122,7 @@ export default function SuratKeluar() {
                     <TableCell className="font-medium">{surat.nomor_surat}</TableCell>
                     <TableCell>{surat.perihal}</TableCell>
                     <TableCell>{surat.tujuan}</TableCell>
+                    <TableCell>{surat.penandatangan || "-"}</TableCell>
                     <TableCell>
                       {surat.sifat && (
                         <Badge variant={surat.sifat === 'Rahasia' || surat.sifat === 'Penting' ? 'destructive' : 'secondary'}>
@@ -159,7 +163,7 @@ export default function SuratKeluar() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     Belum ada surat keluar.
                   </TableCell>
                 </TableRow>

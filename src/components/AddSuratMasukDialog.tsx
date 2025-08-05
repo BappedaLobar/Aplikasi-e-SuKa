@@ -38,7 +38,7 @@ import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png", "image/jpg"];
 
 const formSchema = z.object({
@@ -51,7 +51,7 @@ const formSchema = z.object({
   perihal: z.string().min(1, "Perihal tidak boleh kosong."),
   file: z.custom<FileList>()
     .optional()
-    .refine((files) => !files || files.length === 0 || files[0].size <= MAX_FILE_SIZE, `Ukuran file maksimal 5MB.`)
+    .refine((files) => !files || files.length === 0 || files[0].size <= MAX_FILE_SIZE, `Ukuran file maksimal 1MB.`)
     .refine((files) => !files || files.length === 0 || ACCEPTED_FILE_TYPES.includes(files[0].type), "Hanya format .pdf, .doc, .docx, .jpg, .png yang diterima."),
 });
 

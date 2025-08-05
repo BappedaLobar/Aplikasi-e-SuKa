@@ -31,7 +31,6 @@ import ArchiveDialog from "@/components/ArchiveDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import CreateDisposisiDialog from "@/components/CreateDisposisiDialog";
 
 type SuratMasuk = {
   id: string;
@@ -41,7 +40,6 @@ type SuratMasuk = {
   pengirim: string;
   perihal: string;
   sifat: string;
-  disposisi: { id: string }[]
 };
 
 export default function SuratMasuk() {
@@ -52,7 +50,7 @@ export default function SuratMasuk() {
     setLoading(true);
     const { data, error } = await supabase
       .from("surat_masuk")
-      .select("*, disposisi(id)")
+      .select("*")
       .eq('is_archived', false)
       .order("tanggal_diterima", { ascending: false });
 
@@ -60,7 +58,7 @@ export default function SuratMasuk() {
       showError("Gagal memuat data surat masuk.");
       console.error(error);
     } else {
-      setSuratList(data as any || []);
+      setSuratList(data || []);
     }
     setLoading(false);
   };
@@ -143,9 +141,6 @@ export default function SuratMasuk() {
                           <DropdownMenuItem>Lihat Detail</DropdownMenuItem>
                           <EditSuratMasukDialog surat={surat} onSuratUpdated={fetchSuratMasuk} />
                           <DropdownMenuSeparator />
-                          {surat.disposisi.length === 0 && (
-                            <CreateDisposisiDialog surat={surat} onDisposisiCreated={fetchSuratMasuk} />
-                          )}
                           <ArchiveDialog surat={surat} tableName="surat_masuk" onArchived={fetchSuratMasuk} />
                           <DropdownMenuItem className="text-red-600">
                             Hapus

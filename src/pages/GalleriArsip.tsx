@@ -16,17 +16,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Eye } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import UnarchiveDialog from "@/components/UnarchiveDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import FileViewerDialog from "@/components/FileViewerDialog";
 
 type ArchivedMail = {
   id: string;
@@ -36,6 +39,7 @@ type ArchivedMail = {
   tanggal_surat: string;
   type: 'surat_masuk' | 'surat_keluar';
   created_at: string;
+  file_url: string | null; // Added file_url
 };
 
 export default function GalleriArsip() {
@@ -47,14 +51,14 @@ export default function GalleriArsip() {
     try {
       const { data: suratMasuk, error: errorMasuk } = await supabase
         .from("surat_masuk")
-        .select("id, nomor_surat, perihal, pengirim, tanggal_surat, created_at")
+        .select("id, nomor_surat, perihal, pengirim, tanggal_surat, created_at, file_url") // Select file_url
         .eq("is_archived", true);
 
       if (errorMasuk) throw errorMasuk;
 
       const { data: suratKeluar, error: errorKeluar } = await supabase
         .from("surat_keluar")
-        .select("id, nomor_surat, perihal, tujuan, tanggal_surat, created_at")
+        .select("id, nomor_surat, perihal, tujuan, tanggal_surat, created_at, file_url") // Select file_url
         .eq("is_archived", true);
 
       if (errorKeluar) throw errorKeluar;
@@ -147,6 +151,19 @@ export default function GalleriArsip() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          {surat.file_url && (
+                            <FileViewerDialog
+                              fileUrl={surat.file_url}
+                              fileName={surat.nomor_surat}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Lihat Surat
+                                </DropdownMenuItem>
+                              }
+                            />
+                          )}
+                          <DropdownMenuSeparator />
                           <UnarchiveDialog surat={surat} tableName={surat.type} onUnarchived={fetchArchivedMail} />
                         </DropdownMenuContent>
                       </DropdownMenu>

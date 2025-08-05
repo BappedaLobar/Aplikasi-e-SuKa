@@ -19,6 +19,17 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showError } from "@/utils/toast";
 import ForwardDisposisiDialog from "@/components/ForwardDisposisiDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Eye } from "lucide-react";
+import FileViewerDialog from "@/components/FileViewerDialog";
 
 type Disposisi = {
   id: string;
@@ -30,6 +41,7 @@ type Disposisi = {
     nomor_surat: string;
     perihal: string;
     pengirim: string;
+    file_url: string | null; // Added file_url to surat_masuk
   };
 };
 
@@ -41,7 +53,7 @@ export default function Disposisi() {
     setLoading(true);
     const { data, error } = await supabase
       .from("disposisi")
-      .select("*, surat_masuk(*)")
+      .select("*, surat_masuk(nomor_surat, perihal, pengirim, file_url)") // Select file_url
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -107,7 +119,31 @@ export default function Disposisi() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <ForwardDisposisiDialog disposisi={item} onDisposisiForwarded={fetchDisposisi} />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          {item.surat_masuk.file_url && (
+                            <FileViewerDialog
+                              fileUrl={item.surat_masuk.file_url}
+                              fileName={item.surat_masuk.nomor_surat}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Lihat Surat
+                                </DropdownMenuItem>
+                              }
+                            />
+                          )}
+                          <DropdownMenuSeparator />
+                          <ForwardDisposisiDialog disposisi={item} onDisposisiForwarded={fetchDisposisi} />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))

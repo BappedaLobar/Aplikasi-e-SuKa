@@ -1,6 +1,5 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 
 // Fungsi untuk mendapatkan logo sebagai base64
 async function getLogoBase64() {
@@ -67,28 +66,4 @@ export const generatePdf = async (data: any[], columns: { header: string, access
   });
 
   doc.save(`${title} - ${period}.pdf`);
-};
-
-export const generateExcel = (data: any[], columns: { header: string, accessor: string }[], title: string, period: string) => {
-  const worksheetData = data.map((row, index) => {
-    let newRow: { [key: string]: any } = {};
-    columns.forEach(col => {
-      if (col.accessor === 'no') {
-        newRow[col.header] = index + 1;
-      } else {
-        newRow[col.header] = row[col.accessor];
-      }
-    });
-    return newRow;
-  });
-
-  const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan');
-
-  // Auto-fit columns
-  const colWidths = columns.map(col => ({ wch: Math.max(col.header.length, ...worksheetData.map(row => String(row[col.header]).length)) + 2 }));
-  worksheet['!cols'] = colWidths;
-
-  XLSX.writeFile(workbook, `${title} - ${period}.xlsx`);
 };

@@ -5,10 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import { generatePdf, generateExcel } from '@/utils/reportGenerator';
+import { generatePdf } from '@/utils/reportGenerator';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { FileDown, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
 const months = Array.from({ length: 12 }, (_, i) => ({
@@ -39,7 +39,7 @@ export default function Laporan() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [loading, setLoading] = useState(false);
 
-  const handleGenerateReport = async (reportFormat: 'pdf' | 'excel') => {
+  const handleGenerateReport = async () => {
     setLoading(true);
     const toastId = showLoading('Mempersiapkan laporan...');
 
@@ -70,11 +70,7 @@ export default function Laporan() {
         tanggal_surat: item.tanggal_surat ? format(new Date(item.tanggal_surat), 'dd-MM-yyyy') : '',
       }));
 
-      if (reportFormat === 'pdf') {
-        await generatePdf(formattedData, columns, title, period);
-      } else {
-        generateExcel(formattedData, columns, title, period);
-      }
+      await generatePdf(formattedData, columns, title, period);
 
       showSuccess('Laporan berhasil dibuat!');
     } catch (err: any) {
@@ -150,13 +146,9 @@ export default function Laporan() {
           </div>
 
           <div className="flex flex-col gap-3 pt-4 sm:flex-row">
-            <Button onClick={() => handleGenerateReport('pdf')} disabled={loading} className="w-full sm:w-auto">
+            <Button onClick={handleGenerateReport} disabled={loading} className="w-full sm:w-auto">
               <FileText className="mr-2 h-4 w-4" />
               Cetak PDF
-            </Button>
-            <Button onClick={() => handleGenerateReport('excel')} disabled={loading} className="w-full sm:w-auto" variant="outline">
-              <FileDown className="mr-2 h-4 w-4" />
-              Unduh Excel
             </Button>
           </div>
         </CardContent>

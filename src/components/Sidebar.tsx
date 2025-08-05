@@ -78,7 +78,7 @@ export function Sidebar({ className }: { className?: string }) {
             <LogOut className="mr-2 h-4 w-4" />
             Logout
           </Button>
-          <div className="mt-4 text-center text-xs text-muted-foreground space-y-1">
+          <div className="mt-4 text-left text-xs text-muted-foreground space-y-1">
             <p className="font-semibold">e-SuKa v1.0</p>
             <p>Bappeda Kabupaten Lombok Barat</p>
             <p>&copy; EwinWidiyan</p>

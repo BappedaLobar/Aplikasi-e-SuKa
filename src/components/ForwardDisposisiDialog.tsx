@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { showError, showSuccess } from "@/utils/toast";
 import { ArrowRightCircle } from "lucide-react";
 import { JABATAN_OPTIONS } from "@/lib/constants";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   tujuan_jabatan: z.string().min(1, "Tujuan jabatan harus dipilih."),
@@ -122,9 +123,11 @@ export default function ForwardDisposisiDialog({ disposisi, onDisposisiForwarded
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {JABATAN_OPTIONS.map(jabatan => (
-                        <SelectItem key={jabatan} value={jabatan}>{jabatan}</SelectItem>
-                      ))}
+                      <ScrollArea className="h-[200px]">
+                        {JABATAN_OPTIONS.map(jabatan => (
+                          <SelectItem key={jabatan} value={jabatan}>{jabatan}</SelectItem>
+                        ))}
+                      </ScrollArea>
                     </SelectContent>
                   </Select>
                   <FormMessage />

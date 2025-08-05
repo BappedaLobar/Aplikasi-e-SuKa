@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Dashboard() {
   const [suratMasukCount, setSuratMasukCount] = useState("0");
   const [suratKeluarCount, setSuratKeluarCount] = useState("0");
+  const [disposisiCount, setDisposisiCount] = useState("0");
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -29,6 +30,16 @@ export default function Dashboard() {
         console.error("Error fetching surat keluar count:", skError);
       } else {
         setSuratKeluarCount(String(skCount || 0));
+      }
+
+      const { count: dCount, error: dError } = await supabase
+        .from("disposisi")
+        .select("*", { count: "exact", head: true });
+      
+      if (dError) {
+        console.error("Error fetching disposisi count:", dError);
+      } else {
+        setDisposisiCount(String(dCount || 0));
       }
     };
 
@@ -52,9 +63,9 @@ export default function Dashboard() {
         />
         <StatCard
           title="Disposisi"
-          value="56"
+          value={disposisiCount}
           icon={FileCheck2}
-          description="Total disposisi dibuat bulan ini"
+          description="Total disposisi dibuat"
         />
       </div>
       <div className="grid gap-4 lg:grid-cols-7">

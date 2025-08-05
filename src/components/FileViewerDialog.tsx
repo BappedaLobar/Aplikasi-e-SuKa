@@ -5,7 +5,11 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "./ui/button";
+import { Save } from "lucide-react";
+import { showError, showSuccess } from "@/utils/toast";
 
 interface FileViewerDialogProps {
   fileUrl: string;
@@ -33,6 +37,33 @@ export default function FileViewerDialog({ fileUrl, fileName, trigger }: FileVie
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error('Gagal mengunduh file dari server.');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      
+      const extension = fileUrl.split('.').pop()?.toLowerCase() || 'file';
+      const safeFileName = fileName.replace(/[^a-z0-9_.-]/gi, '_');
+      a.download = `${safeFileName}.${extension}`;
+      
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      showSuccess("File berhasil diunduh.");
+    } catch (error) {
+      console.error("Download failed:", error);
+      showError("Gagal mengunduh file.");
+    }
+  };
+
   const viewerUrl = getViewerUrl(fileUrl);
   const isImage = /\.(jpe?g|png|gif|bmp|webp|svg)$/i.test(fileUrl);
 
@@ -57,6 +88,12 @@ export default function FileViewerDialog({ fileUrl, fileName, trigger }: FileVie
             />
           )}
         </div>
+        <DialogFooter className="pt-4 sm:justify-end">
+          <Button onClick={handleDownload}>
+            <Save className="mr-2 h-4 w-4" />
+            Unduh File
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

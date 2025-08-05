@@ -39,7 +39,7 @@ export default function Laporan() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [loading, setLoading] = useState(false);
 
-  const handleGenerateReport = async (format: 'pdf' | 'excel') => {
+  const handleGenerateReport = async (reportFormat: 'pdf' | 'excel') => {
     setLoading(true);
     const toastId = showLoading('Mempersiapkan laporan...');
 
@@ -70,7 +70,7 @@ export default function Laporan() {
         tanggal_surat: item.tanggal_surat ? format(new Date(item.tanggal_surat), 'dd-MM-yyyy') : '',
       }));
 
-      if (format === 'pdf') {
+      if (reportFormat === 'pdf') {
         await generatePdf(formattedData, columns, title, period);
       } else {
         generateExcel(formattedData, columns, title, period);

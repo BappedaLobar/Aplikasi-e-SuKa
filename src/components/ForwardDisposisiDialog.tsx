@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { showError, showSuccess } from "@/utils/toast";
 import { ArrowRightCircle } from "lucide-react";
+import { JABATAN_OPTIONS } from "@/lib/constants";
 
 const formSchema = z.object({
   tujuan_jabatan: z.string().min(1, "Tujuan jabatan harus dipilih."),
@@ -34,17 +35,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type Disposisi = { id: string; riwayat: any[]; surat_masuk: { nomor_surat: string } };
 type UserProfile = { id: string; full_name: string | null; jabatan: string | null };
-
-const jabatanOptions = [
-  "Kepala Badan",
-  "Sekretaris Badan",
-  "Kepala Bidang Litbang Renbang",
-  "Kepala Bidang Sosbud",
-  "Kepala Bidang Ekonomi",
-  "Kepala Bidang Sarpraswil",
-  "Fungsional",
-  "Staff",
-];
 
 export default function ForwardDisposisiDialog({ disposisi, onDisposisiForwarded }: { disposisi: Disposisi; onDisposisiForwarded: () => void }) {
   const [open, setOpen] = useState(false);
@@ -132,7 +122,7 @@ export default function ForwardDisposisiDialog({ disposisi, onDisposisiForwarded
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {jabatanOptions.map(jabatan => (
+                      {JABATAN_OPTIONS.map(jabatan => (
                         <SelectItem key={jabatan} value={jabatan}>{jabatan}</SelectItem>
                       ))}
                     </SelectContent>

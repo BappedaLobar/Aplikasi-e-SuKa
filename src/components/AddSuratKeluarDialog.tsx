@@ -37,6 +37,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { JABATAN_OPTIONS } from "@/lib/constants";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png", "image/jpg"];
@@ -321,9 +322,22 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tujuan</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contoh: Seluruh Kepala OPD" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih tujuan surat" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <ScrollArea className="h-[200px]">
+                            {JABATAN_OPTIONS.map((jabatan) => (
+                              <SelectItem key={jabatan} value={jabatan}>
+                                {jabatan}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

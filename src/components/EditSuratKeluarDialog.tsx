@@ -37,6 +37,8 @@ import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { JABATAN_OPTIONS } from "@/lib/constants";
+import { ScrollArea } from "./ui/scroll-area";
 
 const formSchema = z.object({
   nomor_surat: z.string().min(1, "Nomor surat tidak boleh kosong."),
@@ -192,9 +194,22 @@ export default function EditSuratKeluarDialog({ surat, onSuratUpdated }: { surat
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tujuan</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Contoh: Seluruh Kepala OPD" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih tujuan surat" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <ScrollArea className="h-[200px]">
+                        {JABATAN_OPTIONS.map((jabatan) => (
+                          <SelectItem key={jabatan} value={jabatan}>
+                            {jabatan}
+                          </SelectItem>
+                        ))}
+                      </ScrollArea>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

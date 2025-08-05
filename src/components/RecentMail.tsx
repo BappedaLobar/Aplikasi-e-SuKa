@@ -18,50 +18,130 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type RecentMail = {
+type Activity = {
   id: string;
-  perihal: string;
-  pengirim: string;
+  type: 'Surat Masuk' | 'Surat Keluar' | 'Disposisi';
+  title: string;
+  description: string;
+  timestamp: string;
 };
 
 export default function RecentMail() {
-  const [mails, setMails] = useState<RecentMail[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRecentMails = async () => {
+    const fetchRecentActivities = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("surat_masuk")
-        .select("id, perihal, pengirim")
-        .order("tanggal_diterima", { ascending: false })
-        .limit(5);
 
-      if (error) {
-        console.error("Error fetching recent mails:", error);
-      } else {
-        setMails(data || []);
+      try {
+        const suratMasukPromise = supabase
+          .from("surat_masuk")
+          .select("id, perihal, pengirim, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        const suratKeluarPromise = supabase
+          .from("surat_keluar")
+          .select("id, perihal, tujuan, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        const disposisiPromise = supabase
+          .from("disposisi")
+          .select("id, tujuan_jabatan, created_at, surat_masuk(perihal)")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        const [
+          { data: suratMasukData, error: smError },
+          { data: suratKeluarData, error: skError },
+          { data: disposisiData, error: dError },
+        ] = await Promise.all([suratMasukPromise, suratKeluarPromise, disposisiPromise]);
+
+        if (smError || skError || dError) {
+          console.error("Error fetching recent activities:", smError || skError || dError);
+          setLoading(false);
+          return;
+        }
+
+        const combinedActivities: Activity[] = [];
+
+        suratMasukData?.forEach(item => {
+          combinedActivities.push({
+            id: `sm-${item.id}`,
+            type: 'Surat Masuk',
+            title: item.perihal,
+            description: `Dari: ${item.pengirim}`,
+            timestamp: item.created_at,
+          });
+        });
+
+        suratKeluarData?.forEach(item => {
+          combinedActivities.push({
+            id: `sk-${item.id}`,
+            type: 'Surat Keluar',
+            title: item.perihal,
+            description: `Tujuan: ${item.tujuan}`,
+            timestamp: item.created_at,
+          });
+        });
+
+        (disposisiData as any[])?.forEach((item) => {
+          if (item.surat_masuk) {
+            combinedActivities.push({
+              id: `d-${item.id}`,
+              type: 'Disposisi',
+              title: `Disposisi: ${item.surat_masuk.perihal}`,
+              description: `Diteruskan ke: ${item.tujuan_jabatan}`,
+              timestamp: item.created_at,
+            });
+          }
+        });
+
+        const sortedActivities = combinedActivities
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 5);
+
+        setActivities(sortedActivities);
+
+      } catch (error) {
+        console.error("Error processing recent activities:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    fetchRecentMails();
+    fetchRecentActivities();
   }, []);
+
+  const getBadgeVariant = (type: Activity['type']) => {
+    switch (type) {
+      case 'Surat Masuk':
+        return 'default';
+      case 'Surat Keluar':
+        return 'destructive';
+      case 'Disposisi':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Aktivitas Surat Terbaru</CardTitle>
+        <CardTitle>Aktivitas Terbaru</CardTitle>
         <CardDescription>
-          5 surat masuk terakhir yang tercatat di sistem.
+          5 aktivitas terakhir dari surat masuk, surat keluar, dan disposisi.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Perihal</TableHead>
-              <TableHead className="text-right">Status</TableHead>
+              <TableHead>Aktivitas</TableHead>
+              <TableHead className="text-right">Jenis</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -73,28 +153,28 @@ export default function RecentMail() {
                     <Skeleton className="mt-1 h-3 w-1/2" />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Skeleton className="h-6 w-12" />
+                    <Skeleton className="h-6 w-20" />
                   </TableCell>
                 </TableRow>
               ))
-            ) : mails.length > 0 ? (
-              mails.map((mail) => (
-                <TableRow key={mail.id}>
+            ) : activities.length > 0 ? (
+              activities.map((activity) => (
+                <TableRow key={activity.id}>
                   <TableCell>
-                    <div className="font-medium">{mail.perihal}</div>
+                    <div className="font-medium">{activity.title}</div>
                     <div className="text-sm text-muted-foreground">
-                      Dari: {mail.pengirim}
+                      {activity.description}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Badge variant="outline">Baru</Badge>
+                    <Badge variant={getBadgeVariant(activity.type)}>{activity.type}</Badge>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={2} className="h-24 text-center">
-                  Belum ada surat.
+                  Belum ada aktivitas.
                 </TableCell>
               </TableRow>
             )}

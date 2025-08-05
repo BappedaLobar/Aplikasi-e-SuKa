@@ -39,7 +39,7 @@ type SuratKeluar = {
   tanggal_surat: string;
   tujuan: string;
   perihal: string;
-  sifat: string;
+  sifat: string | null;
   file_url: string | null;
 };
 
@@ -120,14 +120,16 @@ export default function SuratKeluar() {
                     <TableCell>{surat.perihal}</TableCell>
                     <TableCell>{surat.tujuan}</TableCell>
                     <TableCell>
-                      <Badge variant={surat.sifat === 'Rahasia' || surat.sifat === 'Penting' ? 'destructive' : 'secondary'}>
-                        {surat.sifat}
-                      </Badge>
+                      {surat.sifat && (
+                        <Badge variant={surat.sifat === 'Rahasia' || surat.sifat === 'Penting' ? 'destructive' : 'secondary'}>
+                          {surat.sifat}
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
-                      {new Date(surat.tanggal_surat).toLocaleDateString("id-ID", {
+                      {surat.tanggal_surat ? new Date(surat.tanggal_surat).toLocaleDateString("id-ID", {
                         day: '2-digit', month: 'long', year: 'numeric'
-                      })}
+                      }) : ''}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>

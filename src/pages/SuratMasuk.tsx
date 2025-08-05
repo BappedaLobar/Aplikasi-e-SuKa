@@ -40,7 +40,7 @@ type SuratMasuk = {
   tanggal_diterima: string;
   pengirim: string;
   perihal: string;
-  sifat: string;
+  sifat: string | null;
   file_url: string | null;
   disposisi: { id: string }[];
 };
@@ -122,14 +122,16 @@ export default function SuratMasuk() {
                     <TableCell>{surat.perihal}</TableCell>
                     <TableCell>{surat.pengirim}</TableCell>
                     <TableCell>
-                      <Badge variant={surat.sifat === 'Rahasia' || surat.sifat === 'Penting' ? 'destructive' : 'secondary'}>
-                        {surat.sifat}
-                      </Badge>
+                      {surat.sifat && (
+                        <Badge variant={surat.sifat === 'Rahasia' || surat.sifat === 'Penting' ? 'destructive' : 'secondary'}>
+                          {surat.sifat}
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
-                      {new Date(surat.tanggal_diterima).toLocaleDateString("id-ID", {
+                      {surat.tanggal_diterima ? new Date(surat.tanggal_diterima).toLocaleDateString("id-ID", {
                         day: '2-digit', month: 'long', year: 'numeric'
-                      })}
+                      }) : ''}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>

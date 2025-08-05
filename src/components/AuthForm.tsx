@@ -12,12 +12,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "./ui/scroll-area";
+
+const jabatanOptions = [
+  "Kepala Badan",
+  "Sekretaris Badan",
+  "Kepala Bidang Litbang Renbang",
+  "Kepala Bidang Sosbud",
+  "Kepala Bidang Ekonomi",
+  "Kepala Bidang Sarpraswil",
+  "Fungsional",
+  "Staff",
+];
 
 export default function AuthForm() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [nip, setNip] = useState("");
+  const [jabatan, setJabatan] = useState("");
   const [role, setRole] = useState("user");
   const [loading, setLoading] = useState(false);
 
@@ -34,6 +48,8 @@ export default function AuthForm() {
           data: {
             full_name: fullName,
             role: role,
+            nip: nip,
+            jabatan: jabatan,
           },
         },
       });
@@ -53,7 +69,7 @@ export default function AuthForm() {
       if (error) {
         showError("Email atau password salah.");
       }
-      // Successful login will be handled by the onAuthStateChange listener in App.tsx
+      // Successful login will be handled by the onAuthStateChange listener
     }
     setLoading(false);
   };
@@ -74,6 +90,33 @@ export default function AuthForm() {
                   required
                   placeholder="Nama Anda"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nip">NIP</Label>
+                <Input
+                  id="nip"
+                  type="text"
+                  value={nip}
+                  onChange={(e) => setNip(e.target.value)}
+                  placeholder="NIP (jika ada)"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="jabatan">Jabatan</Label>
+                <Select value={jabatan} onValueChange={setJabatan} required>
+                  <SelectTrigger id="jabatan">
+                    <SelectValue placeholder="Pilih jabatan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <ScrollArea className="h-[200px]">
+                      {jabatanOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </ScrollArea>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Level</Label>

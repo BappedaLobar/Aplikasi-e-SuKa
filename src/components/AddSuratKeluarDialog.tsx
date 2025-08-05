@@ -248,11 +248,13 @@ export default function AddSuratKeluarDialog({ onSuratAdded }: { onSuratAdded: (
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {klasifikasiList.map((k) => (
-                            <SelectItem key={k.kode} value={k.kode}>
-                              {k.kode} - {k.keterangan}
-                            </SelectItem>
-                          ))}
+                          <ScrollArea className="h-[200px]">
+                            {klasifikasiList.map((k) => (
+                              <SelectItem key={k.kode} value={k.kode}>
+                                {k.kode} - {k.keterangan}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
                         </SelectContent>
                       </Select>
                       <FormMessage />

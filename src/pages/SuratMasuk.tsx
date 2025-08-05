@@ -33,6 +33,7 @@ import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import DeleteSuratMasukDialog from "@/components/DeleteSuratMasukDialog";
+import FileViewerDialog from "@/components/FileViewerDialog";
 
 type SuratMasuk = {
   id: string;
@@ -144,13 +145,18 @@ export default function SuratMasuk() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => surat.file_url && window.open(surat.file_url, "_blank")}
-                            disabled={!surat.file_url}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Surat
-                          </DropdownMenuItem>
+                          {surat.file_url && (
+                            <FileViewerDialog
+                              fileUrl={surat.file_url}
+                              fileName={surat.nomor_surat}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Lihat Surat
+                                </DropdownMenuItem>
+                              }
+                            />
+                          )}
                           <EditSuratMasukDialog surat={surat} onSuratUpdated={fetchSuratMasuk} />
                           <DropdownMenuSeparator />
                           {(!surat.disposisi || surat.disposisi.length === 0) ? (

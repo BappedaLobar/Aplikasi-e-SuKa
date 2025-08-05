@@ -32,6 +32,7 @@ import ArchiveDialog from "@/components/ArchiveDialog";
 import { showError } from "@/utils/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import FileViewerDialog from "@/components/FileViewerDialog";
 
 type SuratKeluar = {
   id: string;
@@ -145,13 +146,18 @@ export default function SuratKeluar() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => surat.file_url && window.open(surat.file_url, "_blank")}
-                            disabled={!surat.file_url}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Surat
-                          </DropdownMenuItem>
+                          {surat.file_url && (
+                            <FileViewerDialog
+                              fileUrl={surat.file_url}
+                              fileName={surat.nomor_surat}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Lihat Surat
+                                </DropdownMenuItem>
+                              }
+                            />
+                          )}
                           <EditSuratKeluarDialog surat={surat} onSuratUpdated={fetchSuratKeluar} />
                           <DeleteSuratKeluarDialog surat={surat} onSuratDeleted={fetchSuratKeluar} />
                           <DropdownMenuSeparator />

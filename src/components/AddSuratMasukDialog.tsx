@@ -31,12 +31,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, PlusCircle } from "lucide-react";
+import { CalendarIcon, PlusCircle, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ScanDocumentDialog from "./ScanDocumentDialog";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png", "image/jpg"];
@@ -347,14 +348,25 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
                   render={({ field: { value, onChange, ...rest } }) => (
                     <FormItem>
                       <FormLabel>File Surat (Opsional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                          onChange={(event) => onChange(event.target.files)}
-                          {...rest}
+                      <div className="flex items-center gap-2">
+                        <FormControl className="flex-grow">
+                          <Input
+                            type="file"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                            onChange={(event) => onChange(event.target.files)}
+                            {...rest}
+                          />
+                        </FormControl>
+                        <ScanDocumentDialog
+                          setValue={form.setValue}
+                          onScanComplete={() => {}}
+                          trigger={
+                            <Button type="button" variant="outline" size="icon" aria-label="Pindai Dokumen">
+                              <Camera className="h-4 w-4" />
+                            </Button>
+                          }
                         />
-                      </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

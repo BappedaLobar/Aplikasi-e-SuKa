@@ -19,7 +19,9 @@ const months = [
 ];
 
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
+const startYear = 2020;
+const endYear = 2030;
+const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => String(startYear + i)).reverse();
 
 export default function Laporan() {
   const [reportType, setReportType] = useState<'surat_masuk' | 'surat_keluar'>('surat_masuk');

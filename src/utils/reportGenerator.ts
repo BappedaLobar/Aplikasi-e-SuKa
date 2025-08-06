@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, ImageRun, HeadingLevel } from 'docx';
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, ImageRun, HeadingLevel, Header } from 'docx';
+import { Buffer } from 'buffer';
 
 // Fungsi untuk mengubah gambar menjadi base64
 const toBase64 = (url: string): Promise<string> =>
@@ -48,20 +49,25 @@ export const generatePdf = async (title: string, period: string, headers: string
 
 // --- WORD (DOCX) GENERATOR ---
 export const generateWord = async (title: string, period: string, headers: string[], data: any[][]) => {
-  let imageHeader: ImageRun | Paragraph;
+  let headerParagraph: Paragraph;
   try {
     const response = await fetch('/kop-surat.png');
-    const imageBlob = await response.blob();
-    imageHeader = new ImageRun({
-      data: imageBlob,
-      transformation: {
-        width: 600,
-        height: 90,
-      },
+    const imageBuffer = await response.arrayBuffer();
+    headerParagraph = new Paragraph({
+      children: [
+        new ImageRun({
+          data: Buffer.from(imageBuffer),
+          transformation: {
+            width: 600,
+            height: 90,
+          },
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
     });
   } catch (e) {
     console.error("Kop surat tidak ditemukan di public/kop-surat.png. Laporan akan dibuat tanpa kop.", e);
-    imageHeader = new Paragraph({
+    headerParagraph = new Paragraph({
       children: [new TextRun("Kop Surat Bappeda Lombok Barat")],
       alignment: AlignmentType.CENTER,
     });
@@ -69,7 +75,7 @@ export const generateWord = async (title: string, period: string, headers: strin
 
   const tableHeader = new TableRow({
     children: headers.map(header => new TableCell({
-      children: [new Paragraph({ text: header, style: "strong" })],
+      children: [new Paragraph({ children: [new TextRun({ text: header, bold: true })] })],
       width: { size: 4500 / headers.length, type: WidthType.DXA },
     })),
   });
@@ -89,18 +95,11 @@ export const generateWord = async (title: string, period: string, headers: strin
   });
 
   const doc = new Document({
-    styles: {
-      paragraph: {
-        strong: {
-          run: {
-            bold: true,
-          },
-        },
-      },
-    },
     sections: [{
       headers: {
-        default: new Paragraph(imageHeader),
+        default: new Header({
+          children: [headerParagraph],
+        }),
       },
       children: [
         new Paragraph({ text: "" }), // Spacer
@@ -126,7 +125,7 @@ export const generateWord = async (title: string, period: string, headers: strin
     a.href = url;
     a.download = `Laporan_${title.replace(/ /g, '_')}_${period}.docx`;
     document.body.appendChild(a);
-    a.click();
+a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
   });

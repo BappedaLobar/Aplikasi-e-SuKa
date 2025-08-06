@@ -18,6 +18,7 @@ import { Sidebar } from "./Sidebar";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationBell from "./NotificationBell";
+import ProfileDropdown from "./ProfileDropdown";
 
 const menuItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500" },
@@ -91,7 +92,10 @@ export function Layout() {
             <h1 className="text-lg font-semibold">Elektronik Surat dan Kearsipan Administrasi</h1>
             <p className="text-xs text-muted-foreground">Cepat Suratnya, Aman Arsipnya</p>
           </div>
-          <NotificationBell />
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <ProfileDropdown />
+          </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Outlet />

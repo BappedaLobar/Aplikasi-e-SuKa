@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { generatePdf, generateWord } from '@/utils/reportGenerator';
 import { FileText, FileType } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const months = [
   { value: '01', label: 'Januari' }, { value: '02', label: 'Februari' },
@@ -137,7 +138,9 @@ export default function Laporan() {
                   <SelectValue placeholder="Pilih bulan" />
                 </SelectTrigger>
                 <SelectContent>
-                  {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                  <ScrollArea className="h-[200px]">
+                    {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                  </ScrollArea>
                 </SelectContent>
               </Select>
             </div>
@@ -148,7 +151,9 @@ export default function Laporan() {
                   <SelectValue placeholder="Pilih tahun" />
                 </SelectTrigger>
                 <SelectContent>
-                  {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                  <ScrollArea className="h-[200px]">
+                    {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                  </ScrollArea>
                 </SelectContent>
               </Select>
             </div>

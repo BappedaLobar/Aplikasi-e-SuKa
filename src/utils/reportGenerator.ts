@@ -1,7 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, ImageRun, HeadingLevel, Header } from 'docx';
-import { Buffer } from 'buffer';
 
 // Fungsi untuk mengubah gambar menjadi base64
 const toBase64 = (url: string): Promise<string> =>
@@ -51,12 +50,13 @@ export const generatePdf = async (title: string, period: string, headers: string
 export const generateWord = async (title: string, period: string, headers: string[], data: any[][]) => {
   let headerParagraph: Paragraph;
   try {
-    const response = await fetch('/kop-surat.png');
-    const imageBuffer = await response.arrayBuffer();
+    const base64Image = await toBase64('/kop-surat.png');
+    const pureBase64 = base64Image.split(",")[1];
+
     headerParagraph = new Paragraph({
       children: [
         new ImageRun({
-          data: Buffer.from(imageBuffer),
+          data: pureBase64,
           transformation: {
             width: 600,
             height: 90,

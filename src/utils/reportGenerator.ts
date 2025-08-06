@@ -50,18 +50,17 @@ export const generatePdf = async (title: string, period: string, headers: string
 export const generateWord = async (title: string, period: string, headers: string[], data: any[][]) => {
   let headerParagraph: Paragraph;
   try {
-    const base64Image = await toBase64('/kop-surat.png');
-    const pureBase64 = base64Image.split(",")[1];
-
+    const response = await fetch('/kop-surat.png');
+    const imageBuffer = await response.arrayBuffer();
     headerParagraph = new Paragraph({
       children: [
         new ImageRun({
-          data: pureBase64,
+          data: imageBuffer,
           transformation: {
             width: 600,
             height: 90,
           },
-        }),
+        } as any),
       ],
       alignment: AlignmentType.CENTER,
     });
@@ -125,7 +124,7 @@ export const generateWord = async (title: string, period: string, headers: strin
     a.href = url;
     a.download = `Laporan_${title.replace(/ /g, '_')}_${period}.docx`;
     document.body.appendChild(a);
-a.click();
+    a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
   });

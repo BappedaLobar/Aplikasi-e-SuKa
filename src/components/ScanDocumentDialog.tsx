@@ -61,12 +61,6 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
       
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(playError => {
-            console.error("Video play failed:", playError);
-            setError("Gagal memulai pemutaran video. Coba lagi.");
-          });
-        };
       }
       
       const allDevices = await navigator.mediaDevices.enumerateDevices();
@@ -84,7 +78,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
     } finally {
       setLoading(false);
     }
-  }, [stopStream, selectedDeviceId]);
+  }, [stopStream]);
 
   useEffect(() => {
     if (open) {
@@ -131,6 +125,12 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
     }
   };
 
+  const handleCanPlay = () => {
+    videoRef.current?.play().catch(playError => {
+      console.error("Video play failed:", playError);
+    });
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -157,6 +157,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
         autoPlay
         playsInline
         muted
+        onCanPlay={handleCanPlay}
         className="w-full h-full object-cover"
       />
     );

@@ -38,6 +38,7 @@ import { id } from "date-fns/locale";
 import { showSuccess, showError } from "@/utils/toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ScanDocumentDialog from "./ScanDocumentDialog";
+import { JABATAN_OPTIONS } from "@/lib/constants";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png", "image/jpg"];
@@ -48,7 +49,8 @@ const formSchema = z.object({
   sifat: z.string().min(1, "Jenis surat harus dipilih."),
   nomor_surat: z.string().min(1, "Nomor surat tidak boleh kosong."),
   tanggal_surat: z.date({ required_error: "Tanggal surat harus diisi." }),
-  pengirim: z.string().min(1, "Pengirim tidak boleh kosong."),
+  pengirim: z.string().min(1, "Pengirim harus dipilih."),
+  tujuan_jabatan: z.string().min(1, "Tujuan surat harus dipilih."),
   perihal: z.string().min(1, "Perihal tidak boleh kosong."),
   file: z.custom<FileList>()
     .optional()
@@ -59,6 +61,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type Klasifikasi = { kode: string; keterangan: string };
 type Bidang = { kode: string; nama: string };
+type UserProfile = { id: string; full_name: string | null };
 
 const romanNumerals = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
@@ -66,6 +69,8 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
   const [open, setOpen] = useState(false);
   const [klasifikasiList, setKlasifikasiList] = useState<Klasifikasi[]>([]);
   const [bidangList, setBidangList] = useState<Bidang[]>([]);
+  const [userList, setUserList] = useState<UserProfile[]>([]);
+  const [currentUser, setCurrentUser] = useState<{ id: string; full_name: string | null; jabatan: string | null; } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -77,6 +82,7 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
       sifat: "",
       nomor_surat: "",
       pengirim: "",
+      tujuan_jabatan: "",
       perihal: "",
     },
   });
@@ -93,9 +99,21 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
       const { data: bidangData, error: bidangError } = await supabase.from("bidang").select("kode, nama");
       if (bidangError) showError("Gagal memuat data bidang.");
       else setBidangList(bidangData);
+
+      const { data: userData, error: userError } = await supabase.from("profiles").select("id, full_name");
+      if (userError) showError("Gagal memuat data pengguna.");
+      else setUserList(userData || []);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('id, full_name, jabatan').eq('id', user.id).single();
+        setCurrentUser(profile);
+      }
     };
-    fetchInitialData();
-  }, []);
+    if (open) {
+      fetchInitialData();
+    }
+  }, [open]);
 
   useEffect(() => {
     const generateNomorSurat = async () => {
@@ -149,25 +167,52 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
       fileUrl = publicUrlData.publicUrl;
     }
 
-    const { klasifikasi_kode, bidang_kode, file: formFile, ...rest } = values;
-    const { error } = await supabase.from("surat_masuk").insert([
-      {
-        ...rest,
-        tanggal_surat: format(values.tanggal_surat, "yyyy-MM-dd"),
-        file_url: fileUrl,
-      },
-    ]);
+    const { klasifikasi_kode, bidang_kode, file: formFile, tujuan_jabatan, ...rest } = values;
+    const { data: suratData, error: suratError } = await supabase
+      .from("surat_masuk")
+      .insert([{ ...rest, tanggal_surat: format(values.tanggal_surat, "yyyy-MM-dd"), file_url: fileUrl }])
+      .select()
+      .single();
+
+    if (suratError || !suratData) {
+      showError(`Gagal menambahkan surat: ${suratError?.message}`);
+      setIsUploading(false);
+      return;
+    }
+
+    if (!currentUser) {
+      showError("Gagal mendapatkan data pengguna saat ini untuk membuat disposisi.");
+      setIsUploading(false);
+      return;
+    }
+
+    const initialHistory = [{
+      from: currentUser.full_name || 'System',
+      from_jabatan: currentUser.jabatan || 'N/A',
+      to_jabatan: tujuan_jabatan,
+      catatan: 'Disposisi dibuat otomatis saat input surat.',
+      timestamp: new Date().toISOString(),
+    }];
+
+    const { error: disposisiError } = await supabase.from("disposisi").insert([{
+      surat_masuk_id: suratData.id,
+      tujuan_jabatan: tujuan_jabatan,
+      status: "Baru",
+      catatan: "Disposisi dibuat otomatis saat input surat.",
+      riwayat: initialHistory,
+    }]);
     
     setIsUploading(false);
 
-    if (error) {
-      showError(`Gagal menambahkan surat: ${error.message}`);
+    if (disposisiError) {
+      showError(`Surat berhasil ditambahkan, namun gagal membuat disposisi: ${disposisiError.message}`);
     } else {
-      showSuccess("Surat masuk berhasil ditambahkan.");
-      form.reset();
-      onSuratAdded();
-      setOpen(false);
+      showSuccess("Surat masuk berhasil ditambahkan dan disposisi telah dibuat.");
     }
+    
+    form.reset();
+    onSuratAdded();
+    setOpen(false);
   };
 
   return (
@@ -322,9 +367,48 @@ export default function AddSuratMasukDialog({ onSuratAdded }: { onSuratAdded: ()
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Pengirim</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contoh: Dinas Pendidikan" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih pengirim" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <ScrollArea className="h-[200px]">
+                            {userList.map((user) => (
+                              <SelectItem key={user.id} value={user.full_name || ''}>
+                                {user.full_name}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tujuan_jabatan"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tujuan Surat</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih tujuan surat" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <ScrollArea className="h-[200px]">
+                            {JABATAN_OPTIONS.map((jabatan) => (
+                              <SelectItem key={jabatan} value={jabatan}>
+                                {jabatan}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

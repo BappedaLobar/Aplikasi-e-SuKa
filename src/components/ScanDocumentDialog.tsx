@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Camera, RefreshCw } from 'lucide-react';
+import { Camera, RefreshCw, Loader2 } from 'lucide-react';
 import { showError } from '@/utils/toast';
 import {
   Select,
@@ -32,6 +32,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -45,6 +46,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
   const startStream = useCallback(async (deviceId?: string) => {
     stopStream();
     setError(null);
+    setLoading(true);
 
     const constraints: MediaStreamConstraints = {
       video: deviceId 
@@ -94,6 +96,8 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
       } else {
         setError("Gagal mengakses kamera. Pastikan izin telah diberikan.");
       }
+    } finally {
+        setLoading(false);
     }
   }, [stopStream]);
 
@@ -128,6 +132,37 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
     }
   };
 
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="mt-2">Menyalakan kamera...</p>
+        </div>
+      );
+    }
+    if (error) {
+      return (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted text-destructive text-center p-4">
+          <p>{error}</p>
+          <Button variant="outline" size="sm" onClick={() => startStream()} className="mt-4">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Coba Lagi
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="w-full h-full object-cover"
+      />
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -138,29 +173,13 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
             Posisikan dokumen di depan kamera dan klik "Ambil Gambar".
           </DialogDescription>
         </DialogHeader>
-        <div className="relative">
-          {error ? (
-            <div className="w-full h-64 flex flex-col items-center justify-center bg-muted rounded-md text-destructive text-center p-4">
-              <p>{error}</p>
-              <Button variant="outline" size="sm" onClick={() => startStream()} className="mt-4">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Coba Lagi
-              </Button>
-            </div>
-          ) : (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-auto rounded-md bg-muted"
-            />
-          )}
+        <div className="relative w-full aspect-video bg-muted rounded-md overflow-hidden">
+          {renderContent()}
           <canvas ref={canvasRef} className="hidden" />
         </div>
         <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
             {devices.length > 1 && (
-              <Select value={selectedDeviceId} onValueChange={(id) => startStream(id)} disabled={!!error}>
+              <Select value={selectedDeviceId} onValueChange={(id) => startStream(id)} disabled={loading || !!error}>
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Pilih Kamera" />
                 </SelectTrigger>
@@ -173,7 +192,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
                 </SelectContent>
               </Select>
             )}
-            <Button onClick={handleCapture} disabled={!stream || !!error} className="w-full sm:w-auto">
+            <Button onClick={handleCapture} disabled={loading || !stream || !!error} className="w-full sm:w-auto">
                 <Camera className="mr-2 h-4 w-4" />
                 Ambil Gambar
             </Button>

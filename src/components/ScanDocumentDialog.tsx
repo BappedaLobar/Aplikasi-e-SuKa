@@ -11,7 +11,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Camera, RefreshCw, Loader2 } from 'lucide-react';
-import { showError } from '@/utils/toast';
 import {
   Select,
   SelectContent,
@@ -28,20 +27,21 @@ interface ScanDocumentDialogProps {
 
 export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }: ScanDocumentDialogProps) {
   const [open, setOpen] = useState(false);
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const stopStream = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
-  }, [stream]);
+  }, []);
 
   const startStream = useCallback(async (deviceId?: string) => {
     stopStream();
@@ -57,7 +57,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
 
     try {
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-      setStream(newStream);
+      streamRef.current = newStream;
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
       }
@@ -68,50 +68,39 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
 
       const currentTrack = newStream.getVideoTracks()[0];
       const currentDeviceId = currentTrack.getSettings().deviceId;
-      if (currentDeviceId) {
+      if (currentDeviceId && !selectedDeviceId) {
         setSelectedDeviceId(currentDeviceId);
       }
-
     } catch (err: any) {
       console.error("Error starting stream:", err.name, err.message);
-      if (err.name === 'OverconstrainedError' || err.name === 'NotFoundError' || err.name === 'NotAllowedError') {
-        try {
-          console.log("Retrying with default camera...");
-          const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          setStream(fallbackStream);
-          if (videoRef.current) {
-            videoRef.current.srcObject = fallbackStream;
-          }
-          const allDevices = await navigator.mediaDevices.enumerateDevices();
-          const videoDevices = allDevices.filter(d => d.kind === 'videoinput');
-          setDevices(videoDevices);
-          const currentTrack = fallbackStream.getVideoTracks()[0];
-          const currentDeviceId = currentTrack.getSettings().deviceId;
-          if (currentDeviceId) {
-            setSelectedDeviceId(currentDeviceId);
-          }
-        } catch (fallbackErr: any) {
-          setError("Gagal mengakses kamera. Pastikan izin telah diberikan dan tidak ada aplikasi lain yang menggunakannya.");
-        }
-      } else {
-        setError("Gagal mengakses kamera. Pastikan izin telah diberikan.");
-      }
+      setError("Gagal mengakses kamera. Pastikan izin telah diberikan dan tidak ada aplikasi lain yang menggunakannya.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-  }, [stopStream]);
+  }, [stopStream, selectedDeviceId]);
 
   useEffect(() => {
     if (open) {
-      startStream();
+      startStream(selectedDeviceId || undefined);
     } else {
       stopStream();
     }
-    return () => stopStream();
-  }, [open, startStream, stopStream]);
+
+    return () => {
+      stopStream();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    if (open && selectedDeviceId) {
+        startStream(selectedDeviceId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDeviceId]);
 
   const handleCapture = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && streamRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -145,7 +134,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
       return (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted text-destructive text-center p-4">
           <p>{error}</p>
-          <Button variant="outline" size="sm" onClick={() => startStream()} className="mt-4">
+          <Button variant="outline" size="sm" onClick={() => startStream(selectedDeviceId || undefined)} className="mt-4">
             <RefreshCw className="mr-2 h-4 w-4" />
             Coba Lagi
           </Button>
@@ -179,7 +168,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
         </div>
         <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
             {devices.length > 1 && (
-              <Select value={selectedDeviceId} onValueChange={(id) => startStream(id)} disabled={loading || !!error}>
+              <Select value={selectedDeviceId} onValueChange={setSelectedDeviceId} disabled={loading || !!error}>
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Pilih Kamera" />
                 </SelectTrigger>
@@ -192,7 +181,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
                 </SelectContent>
               </Select>
             )}
-            <Button onClick={handleCapture} disabled={loading || !stream || !!error} className="w-full sm:w-auto">
+            <Button onClick={handleCapture} disabled={loading || !streamRef.current || !!error} className="w-full sm:w-auto">
                 <Camera className="mr-2 h-4 w-4" />
                 Ambil Gambar
             </Button>

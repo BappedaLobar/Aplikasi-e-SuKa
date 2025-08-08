@@ -30,7 +30,7 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -58,8 +58,15 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
     try {
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = newStream;
+      
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(playError => {
+            console.error("Video play failed:", playError);
+            setError("Gagal memulai pemutaran video. Coba lagi.");
+          });
+        };
       }
       
       const allDevices = await navigator.mediaDevices.enumerateDevices();
@@ -94,10 +101,13 @@ export default function ScanDocumentDialog({ setValue, onScanComplete, trigger }
 
   useEffect(() => {
     if (open && selectedDeviceId) {
-        startStream(selectedDeviceId);
+        const currentTrack = streamRef.current?.getVideoTracks()[0];
+        if (currentTrack?.getSettings().deviceId !== selectedDeviceId) {
+            startStream(selectedDeviceId);
+        }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDeviceId]);
+  }, [selectedDeviceId, open]);
 
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current && streamRef.current) {

@@ -90,7 +90,6 @@ export function Layout() {
           </Sheet>
           <div className="w-full flex-1">
             <div className="flex items-center gap-4">
-              <img src="/logo-lombok-barat.png" alt="Logo Lombok Barat" className="h-9 w-auto hidden md:block" />
               <div>
                 <h1 className="text-lg font-semibold">Elektronik Surat dan Kearsipan Administrasi</h1>
                 <p className="text-xs text-muted-foreground">Cepat Suratnya, Aman Arsipnya</p>

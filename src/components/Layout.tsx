@@ -57,7 +57,7 @@ export function Layout() {
                 to="/"
                 className="flex items-center gap-3 text-lg font-semibold mb-4"
               >
-                <img src="/logo-lombok-barat.png" alt="Logo e-SuKa" className="h-8 w-auto" />
+                <img src="/logo-arsip.svg" alt="Logo e-SuKa" className="h-8 w-auto" />
                 <div>
                   <span className="">e-SuKa</span>
                   <p className="text-xs font-normal text-muted-foreground">Bappeda Kabupaten Lombok Barat</p>

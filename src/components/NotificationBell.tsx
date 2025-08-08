@@ -68,7 +68,7 @@ export default function NotificationBell() {
           
           showBrowserNotification(notificationTitle, {
             body: notificationBody,
-            icon: '/logo.svg',
+            icon: '/logo-lombok-barat.png',
           });
           
           showInfo(`Surat Masuk Baru: ${newSurat.perihal}`);

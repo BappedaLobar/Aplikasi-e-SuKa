@@ -56,7 +56,7 @@ export function Sidebar({ className }: { className?: string }) {
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-16 items-center border-b px-4 lg:h-[68px] lg:px-6">
           <NavLink to="/" className="flex items-center gap-3 font-semibold">
-            <img src="/logo-lombok-barat.svg" alt="Logo e-SuKa" className="h-8 w-auto" />
+            <img src="/logo-lombok-barat.png" alt="Logo e-SuKa" className="h-8 w-auto" />
             <div>
               <span className="text-lg">e-SuKa</span>
               <p className="text-xs font-normal text-muted-foreground">Bappeda Kabupaten Lombok Barat</p>
